@@ -8,3 +8,5 @@ Currently game can be built for
 - Linux & Cygwin (GCC)
 - DOS (Watcom) 
 - HTML5 browsers (Emscripten)
+
+[Ascii Patrol Home Page (ascii-patrol.com)](http://ascii-patrol.com)
