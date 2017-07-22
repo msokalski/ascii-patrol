@@ -10,3 +10,6 @@ Currently game can be built for
 - HTML5 browsers (Emscripten)
 
 [Ascii Patrol Home Page (ascii-patrol.com)](http://ascii-patrol.com)
+
+Accordingly to [rasberrypi.org](https://www.raspberrypi.org/forums/viewtopic.php?f=78&t=188406)
+AP can be easily built and runs great on Rasberry PI!
