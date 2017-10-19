@@ -17,3 +17,5 @@ temp_xp program which converts all .xp files located in some directory to assets
 
 Accordingly to [raspberrypi.org](https://www.raspberrypi.org/forums/viewtopic.php?f=78&t=188406)
 AP can be easily built and runs great on Raspberry PI!
+
+Find me on Twitter: @MrGumix
