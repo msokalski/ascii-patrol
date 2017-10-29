@@ -1633,8 +1633,25 @@ int validate_score(const char* path, int* avatar, char* name)
 		iSubLev, hitbin,
 		record_file); // <<<<<<<<<<< !!!!!!!!!!!!!!!!!!!!!!
 
+	bool export_movie = false; // true;
+	int export_ticks_per_frame = 2; // 30fps?
+	int export_tick = 0;
+	int export_frame = 0;
+
 	while (1)
 	{
+		if (export_movie)
+		{
+			if (export_tick == export_ticks_per_frame)
+			{
+				char name[1024];
+				sprintf_s(name, 1024, "export_%05d",export_frame);
+				screen_shot(&global_screen, name);
+				export_frame++;
+				export_tick = 0;
+			}
+			export_tick++;
+		}
 		int ret = level_modal->Run();
 		if (ret>=0)
 		{
