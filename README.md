@@ -25,6 +25,8 @@ Find me on Twitter: @MrGumix
 Arch Linux:
 - https://aur.archlinux.org/packages/ascii-patrol-git/
   by @SlavMetal
+- https://aur.archlinux.org/packages/ascii-patrol/
+  by Towtow10 (only x64)
   
 ## Build instructions on Linux (assuming we have git and g++):
 ```
