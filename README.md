@@ -19,3 +19,41 @@ Accordingly to [raspberrypi.org](https://www.raspberrypi.org/forums/viewtopic.ph
 AP can be easily built and runs great on Raspberry PI!
 
 Find me on Twitter: @MrGumix
+
+## Build instructions on Linux (assuming we have git and g++):
+```
+# clone sources repo
+git clone https://github.com/msokalski/ascii-patrol.git
+
+# enter sources directory
+cd ascii-patrol
+
+# enable execution of build.sh and run.sh scripts
+chmod +x *.sh
+
+# install required packages, (no apt-get -> use pacman)
+sudo apt-get install libx11-dev libpulse-dev
+
+# invoke compilation
+./build.sh
+```
+## Running
+Ascii Patrol uses curl to communicate with hi-score server (ascii-patrol.com)
+So optionally let's install it if needed.
+`sudo apt-get install curl`
+
+Finally let's piu-piu !
+`./asciipat`
+or
+`./run.sh`
+
+## Problems?
+no sound? -> install / start pulseaudio
+weird colors? -> try another terminal emulator or just run from raw console (ctrl-alt-F1 or so)
+poor font look? -> try to change it in your terminal or in case of raw console use setfont
+keyboard doesn't work? -> try another terminal emulator or just run from raw console (ctrl-alt-F1 or so)
+no hi-scores table? -> install curl
+
+
+
+
