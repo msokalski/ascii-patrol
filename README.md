@@ -24,7 +24,8 @@ Find me on Twitter: @MrGumix
 ## Need a package? Try these:
 Arch Linux:
 - https://aur.archlinux.org/packages/ascii-patrol-git/
-
+  by @SlavMetal
+  
 ## Build instructions on Linux (assuming we have git and g++):
 ```
 # clone sources repo
