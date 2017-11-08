@@ -21,7 +21,7 @@ AP can be easily built and runs great on Raspberry PI!
 Find me on Twitter: @MrGumix
 
 
-## Need a package, try these:
+## Need a package? Try these:
 Arch Linux:
 - https://aur.archlinux.org/packages/ascii-patrol-git/
 
