@@ -48,11 +48,11 @@ or
 `./run.sh`
 
 ## Problems?
-no sound? -> install / start pulseaudio
-weird colors? -> try another terminal emulator or just run from raw console (ctrl-alt-F1 or so)
-poor font look? -> try to change it in your terminal or in case of raw console use setfont
-keyboard doesn't work? -> try another terminal emulator or just run from raw console (ctrl-alt-F1 or so)
-no hi-scores table? -> install curl
+- no sound? -> install / start pulseaudio
+- weird colors? -> try another terminal emulator or run from raw console (ctrl-alt-F1 or so)
+- poor font look? -> try changing font in your terminal or in case of raw console use setfont
+- keyboard doesn't work? -> try another terminal emulator or run from raw console
+- no hi-scores table? -> install curl
 
 
 
