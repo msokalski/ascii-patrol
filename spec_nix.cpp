@@ -304,16 +304,16 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 				switch (c)
 				{
 					case 65: ir[i].Event.KeyEvent.uChar.AsciiChar = ' '; break;
-					case 0x47+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_HOM; break;
-					case 0x48+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_UP; break;
-					case 0x49+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PUP; break;
-					case 0x4B+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_LT; break;
-					case 0x4D+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_RT; break;
-					case 0x4F+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_END; break;
-					case 0x50+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DN; break;
-					case 0x51+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PDN; break;
-					case 0x52+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_INS; break;
-					case 0x53+8: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DEL; break;
+					case 'n': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_HOM; break;
+					case 'o': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_UP; break;
+					case 'p': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PUP; break;
+					case 'q': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_LT; break;
+					case 'r': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_RT; break;
+					case 's': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_END; break;
+					case 't': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DN; break;
+					case 'u': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PDN; break;
+					case 'v': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_INS; break;
+					case 'w': ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DEL; break;
 
 					default:
 					{
@@ -547,7 +547,7 @@ static void initTermios()
 		tty_attr.c_iflag &= ~(ISTRIP | INLCR | ICRNL | IGNCR | IXON | IXOFF);
 		tcsetattr(0, TCSANOW, &tty_attr);
 
-		ioctl(0, KDSKBMODE, K_RAW);
+		ioctl(0, KDSKBMODE, K_MEDIUMRAW);
 		raw_keyboard = true;
 	}
 	else
