@@ -55,6 +55,8 @@ Finally let's piu-piu !
 or
 `./run.sh`
 
+More on asciipat arguments can be found here: http://ascii-patrol.com/forum/index.php?topic=63
+
 ## Problems?
 - no sound? -> install / start pulseaudio
 - weird colors? -> try another terminal emulator or run from raw console (ctrl-alt-F1 or so)
