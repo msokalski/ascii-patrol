@@ -764,6 +764,10 @@ function render_3d()
 function get_hiscore(uri) {
 	var get_xhr = new XMLHttpRequest();
 
+	// detect if we are on HTTP or HTTPS
+	if ('https:' == document.location.protocol)
+		uri = uri.replace('http:','https:');
+	
 	get_xhr.open('GET', uri, true);
 
 	get_xhr.onreadystatechange = function () {
@@ -798,6 +802,11 @@ function post_hiscore(uri)
 	data.append('rec', blob);
 
 	var post_xhr = new XMLHttpRequest();
+	
+	// detect if we are on HTTP or HTTPS
+	if ('https:' == document.location.protocol)
+		uri = uri.replace('http:','https:');
+	
 	post_xhr.open('POST', uri, true);
 
 	post_xhr.onreadystatechange = function () {
