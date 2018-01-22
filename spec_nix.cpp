@@ -415,8 +415,6 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 
 				int c = key->detail;
 
-				printf("KEY:%d\n",c);
-
 				switch (c&0x7f)
 				{
 					case 0xe0+8: // escape code
