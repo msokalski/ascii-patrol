@@ -21,6 +21,7 @@ g++ \
 	spec_web.cpp \
 	-L/usr/X11/lib \
 	-lX11 \
+	-lXi \
 	-lpulse \
 	-o asciipat
 

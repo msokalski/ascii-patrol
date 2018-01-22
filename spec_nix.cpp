@@ -8,11 +8,14 @@
 #include <X11/XKBlib.h>
 #include <pthread.h>
 
+#include <X11/extensions/XInput2.h>
 #include <pulse/pulseaudio.h>
 
 static bool raw_keyboard = false;
 static bool use_xterm_256 = true;
 
+static bool use_xi = false;
+static int xi_opcode = -1;
 static Display* dpy = 0;
 static Window win; // current focus
 static Window root; // default root
@@ -389,19 +392,95 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 	for (int j=0; j<nm && i<n; j++)
 	{
 		XEvent ev;
+
+		XGenericEventCookie *cookie = &ev.xcookie;
 		XNextEvent(dpy, &ev);
+
+		if (use_xi)
+		{
+	            if (cookie->type != GenericEvent ||
+        		cookie->extension != xi_opcode)
+	                continue;
+
+	            if (XGetEventData(dpy, cookie))
+	            {
+
+			if (cookie->evtype == 2 || cookie->evtype == 3)
+			{
+			    XIDeviceEvent* key = (XIDeviceEvent*)cookie->data;
+
+				ir[i].EventType = CON_INPUT_KBD;
+				ir[i].Event.KeyEvent.bKeyDown = cookie->evtype == 2;
+				ir[i].Event.KeyEvent.uChar.AsciiChar = 0;
+
+				int c = key->detail;
+
+				printf("KEY:%d\n",c);
+
+				switch (c&0x7f)
+				{
+					case 0xe0+8: // escape code
+						break;
+
+					case 0x2a+8:
+						l_shift = ir[i].Event.KeyEvent.bKeyDown;
+					break;
+
+					case 0x36+8:
+						r_shift = ir[i].Event.KeyEvent.bKeyDown;
+					break;
+
+					case 66:
+					{
+						//if (ir[i].Event.KeyEvent.bKeyDown)
+						{
+							unsigned int n=0;
+							XkbGetIndicatorState(dpy, XkbUseCoreKbd, &n);
+							caps = n&1;
+						}
+						break;
+					}
+
+					case  65: ir[i].Event.KeyEvent.uChar.AsciiChar = ' '; break;
+					case 110: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_HOM; break;
+					case 111: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_UP; break;
+					case 112: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PUP; break;
+					case 113: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_LT; break;
+					case 114: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_RT; break;
+					case 115: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_END; break;
+					case 116: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DN; break;
+					case 117: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PDN; break;
+					case 118: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_INS; break;
+					case 119: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DEL; break;
+
+					default:
+						if (c*sizeof(int)<sizeof(key_map))
+						{
+							int s = (l_shift+r_shift) > 0;
+							if ((key_map[c]&0xFF) >='a' && (key_map[c]&0xFF) <='z')
+								s ^= caps;
+
+							if (s && (key_map[c]&0xFF00))
+								ir[i].Event.KeyEvent.uChar.AsciiChar = (key_map[c]>>8)&0xFF;
+							else
+								ir[i].Event.KeyEvent.uChar.AsciiChar = key_map[c]&0xFF;
+						}
+				}
+
+				i++;
+				break;
+
+			}
+
+	                XFreeEventData(dpy, &ev.xcookie);
+			continue;
+	            }
+		    // continue;
+		}
 
 		switch(ev.type)
 		{
 			case FocusIn:
-				/*
-				XGrabKeyboard(dpy, win,
-								  False,
-								  GrabModeAsync,
-								  GrabModeAsync,
-								  CurrentTime);
-				*/
-
 				{
 					unsigned int n=0;
 					XkbGetIndicatorState(dpy, XkbUseCoreKbd, &n);
@@ -410,13 +489,12 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 				break;
 
 			case FocusOut:
-			    //XUngrabKeyboard(dpy, CurrentTime);
 
 				int revert;
 				XGetInputFocus(dpy, &win, &revert);
 
 				if (win == PointerRoot)
-                    win = root;
+                		    win = root;
 
 				XSelectInput(dpy, win, KeyPressMask|KeyReleaseMask|FocusChangeMask);
 
@@ -441,12 +519,6 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 
 				int c = ev.xkey.keycode;
 
-				/*
-				FILE* f=fopen("kbd.log","a");
-				fprintf(f,"scan=%d, %s\n",c,ir[i].Event.KeyEvent.bKeyDown?"down":"up");
-				fclose(f);
-				*/
-
 				switch (c&0x7f)
 				{
 					case 0xe0+8: // escape code
@@ -462,7 +534,7 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 
 					case 66:
 					{
-						if (ir[i].Event.KeyEvent.bKeyDown)
+						//if (ir[i].Event.KeyEvent.bKeyDown)
 						{
 							unsigned int n=0;
 							XkbGetIndicatorState(dpy, XkbUseCoreKbd, &n);
@@ -472,16 +544,17 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 					}
 
 					case  65: ir[i].Event.KeyEvent.uChar.AsciiChar = ' '; break;
-					case  97: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_HOM; break;
-					case  98: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_UP; break;
-					case  99: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PUP; break;
-					case 100: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_LT; break;
-					case 102: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_RT; break;
-					case 103: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_END; break;
-					case 104: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DN; break;
-					case 105: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PDN; break;
-					case 106: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_INS; break;
-					case 107: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DEL; break;
+					case 110: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_HOM; break;
+					case 111: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_UP; break;
+					case 112: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PUP; break;
+					case 113: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_LT; break;
+					case 114: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_RT; break;
+					case 115: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_END; break;
+					case 116: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DN; break;
+					case 117: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_PDN; break;
+					case 118: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_INS; break;
+					case 119: ir[i].Event.KeyEvent.uChar.AsciiChar = KBD_DEL; break;
+
 
 					default:
 						if (c*sizeof(int)<sizeof(key_map))
@@ -683,6 +756,39 @@ static void terminal_signal(int signum)
 }
 
 
+static void select_events(Display *dpy, Window win)
+{
+    XIEventMask evmasks[2];
+    unsigned char mask1[(XI_LASTEVENT + 7)/8];
+    unsigned char mask2[(XI_LASTEVENT + 7)/8];
+
+    memset(mask1, 0, sizeof(mask1));
+
+    /* select for button and key events from all master devices */
+//    XISetMask(mask1, XI_ButtonPress);
+//    XISetMask(mask1, XI_ButtonRelease);
+    XISetMask(mask1, XI_KeyPress);
+    XISetMask(mask1, XI_KeyRelease);
+
+    evmasks[0].deviceid = XIAllMasterDevices;
+    evmasks[0].mask_len = sizeof(mask1);
+    evmasks[0].mask = mask1;
+
+    memset(mask2, 0, sizeof(mask2));
+
+    /* Select for motion from the default cursor */
+    XISetMask(mask2, XI_Motion);
+
+    evmasks[1].deviceid = 2; /* the default cursor */
+    evmasks[1].mask_len = sizeof(mask2);
+    evmasks[1].mask = mask2;
+
+    XISelectEvents(dpy, win, evmasks, 2);
+    XFlush(dpy);
+}
+
+
+
 int terminal_init(int argc, char* argv[], int* dw, int* dh)
 {
 	const char* term = getenv("TERM");
@@ -730,6 +836,9 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 		}
 		else
 		{
+
+
+
 			Bool supported = false;
 			XkbSetDetectableAutoRepeat(dpy, True, &supported);
 
@@ -742,6 +851,15 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 
 			if (win)
 			{
+			    int event, error;
+			    if (XQueryExtension(dpy, "XInputExtension", &xi_opcode,&event,&error))
+			    {
+				select_events(dpy,win);
+				use_xi = true;
+			    }
+			    else
+			    {
+
 				printf("connecting input to window = %lu\n",win);
 
 				victim = win;
@@ -757,6 +875,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 				*/
 
 				XFlush(dpy);
+			    }
 			}
 			else
 			{
