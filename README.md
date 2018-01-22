@@ -42,7 +42,7 @@ chmod +x *.sh
 # install required packages, (no apt-get -> use pacman)
 sudo apt-get install libx11-dev libpulse-dev
 
-# to fix problems of no keyboard input in few gnome terminals we require XI2
+# to fix problems with no keyboard input in few gnome terminals we require XI2
 sudo apt-get install libxi-dev
 
 # invoke compilation
