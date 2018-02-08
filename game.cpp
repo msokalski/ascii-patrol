@@ -66,8 +66,8 @@ const DIALOG dlg_beginner_1[]=
 	{
 		'C',
 		"Unfortunately, we don't know why and where are\n"
-		"they comng from. Proceed to next sector, maybe\n"
-		"there we can find some answers. Watch out you\n"
+		"they coming from. Proceed to the next sector, maybe\n"
+		"there we can find some answers. Watch out, you\n"
 		"are entering their minefield!"
 	},
 	{
@@ -91,8 +91,8 @@ const DIALOG dlg_beginner_2[]=
 	},
 	{
 		'C',
-		"Ok, I have some importand mission for you.\n"
-		"Our sattelites have located wierd behaviour of\n"
+		"Ok, I have some important mission for you.\n"
+		"Our satellites have located weird behavior of\n"
 		"invading ships over next sector. It seams they\n"
 		"are trying to extract sulfur resources from our\n"
 		"planet. Go and check what are they doing there."
@@ -115,7 +115,7 @@ const DIALOG dlg_beginner_3[]=
 	},
 	{
 		'P',
-		"Sulfur, aliens, dust and crateres?",
+		"Sulfur, aliens, dust and craters?",
 	},
 	{
 		'C',
@@ -148,7 +148,7 @@ const DIALOG dlg_beginner_4[]=
 	},
 	{
 		'C',
-		"Sattelites have detected new kind of missles.\n"
+		"Satellites have detected new kind of missiles.\n"
 		"It looks like they were following you for some\n"
 		"time. It seams they are quite dangerous so be\n"
 		"very careful. If you see one go as fast as you\n"
@@ -156,8 +156,8 @@ const DIALOG dlg_beginner_4[]=
 	},
 	{
 		'P',
-		"Thanks! You looks so pretty when you're talking\n"
-		"about all these military stuff."
+		"Thanks! You look so pretty when you're talking\n"
+		"about all this military stuff."
 	},
 	{
 		'C',
@@ -186,7 +186,7 @@ const DIALOG dlg_champion_0[]=
 	{
 		'C',
 		"Never mind, not a big deal. I was a bit nervy\n"
-		"because of the invation. Now we need to find\n"
+		"because of the invasion. Now we need to find\n"
 		"out what happens with these green life forms.\n"
 		"Keep following the convey, we are almost at the\n"
 		"destination. See you at the next patrol camp!"
@@ -214,18 +214,18 @@ const DIALOG dlg_champion_1[]=
 	},
 	{
 		'P',
-		"Calm down Commander, I havn't seen any of these\n"
+		"Calm down Commander, I haven't seen any of these\n"
 		"creatures doing anything at all. They are more\n"
 		"like plants. Just vegetating there and there.\n"
 		"Maybe they won't do anything bad to us, we have\n"
-		"to analyse first, what these life forms are."
+		"to analyze first, what these life forms are."
 	},
 	{
 		'C',
 		"Yes, you are are %.\n"
 		"I'm just slowly loosing my faith we can win.\n"
 		"There are so many of the eggs and now these\n"
-		"creature-plants. Who knows what they prepared\n"
+		"creature-plants. Who knows what have they prepared\n"
 		"for us?"
 	},
 	{
@@ -271,7 +271,7 @@ const DIALOG dlg_champion_2[]=
 	},
 	{
 		'P',
-		"I think I've recevied a message from aliens!"
+		"I think I've received a message from aliens!"
 	},
 	{
 		'C',
@@ -293,7 +293,7 @@ const DIALOG dlg_champion_3[]=
 		"So now you know, your friendly alien plants are\n"
 		"doing these interferences! It is destroying all\n"
 		"our devices, buildings start to fall down too!\n"
-		"Hey you, alien mashroom! or whatever I should\n"
+		"Hey you, alien mushroom! Or whatever I should\n"
 		"call you, go back where you came from!"
 	},
 	{
@@ -342,7 +342,7 @@ const DIALOG dlg_champion_4[]=
 	},
 	{
 		'A',
-		"NOW WE WILL START OVER FROM THE BEGGINING\n"
+		"NOW WE WILL START OVER FROM THE BEGINNING\n"
 		"HA HA HA Ha Ha Ha ha ha ha\n"
 		"GOOD LUCK %!"
 	},
