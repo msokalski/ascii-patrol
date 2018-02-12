@@ -80,12 +80,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MULTIMEDIA\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\MULTIMEDIA\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Emscripten'">
@@ -110,14 +110,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MULTIMEDIA\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\MULTIMEDIA\SDK\MICROSOFT DIRECTX 9.0 SDK (OCTOBER 2004)\Lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en-us">
   <head>
     <meta charset="utf-8" />
@@ -10,6 +10,31 @@
     <title>ASCII PATROL</title>
 
 <script>
+/*
+
+Copyright (C) 2016 Marcin Sokalski
+All rights reserved.
+
+ASCII PATROL ALPHA RELEASE LICENSE
+
+You are granted a non-exclusive License to use the Software for any purposes for an unlimited period of time. The software product under this License is provided free of charge.
+Even though a license fee is not paid for the use of Freeware Version software, it does not mean that there are no conditions for using such software:
+
+* The Software may be installed and used by the Licensee for any legal purpose.
+
+* The Software may be installed and used by the Licensee on any number of systems.
+
+* The Software may be used solely for your personal, informational, noncommercial purposes.
+
+* The Software MAY NOT be modified or altered in any way
+
+* The Software MAY NOT be redistributed over public channels. The program may be redistributed freely through private means (such as e-mail), provided all of its files (including this and other documentation) remain unchanged.
+
+* The Licensee will not have any proprietary rights in and to the Software. The Licensee acknowledges and agrees that the Licensor retains all copyrights and other proprietary rights in and to the Software.
+
+* Use within the scope of this License is free of charge and no royalty or licensing fees shall be paid by the Licensee.
+
+*/
 
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -767,7 +792,7 @@ function get_hiscore(uri) {
 	// detect if we are on HTTP or HTTPS
 	if ('https:' == document.location.protocol)
 		uri = uri.replace('http:','https:');
-	
+
 	get_xhr.open('GET', uri, true);
 
 	get_xhr.onreadystatechange = function () {
@@ -801,12 +826,11 @@ function post_hiscore(uri)
 	var blob = new Blob([buf], {type: 'application/octet-binary'});
 	data.append('rec', blob);
 
-	var post_xhr = new XMLHttpRequest();
-	
 	// detect if we are on HTTP or HTTPS
 	if ('https:' == document.location.protocol)
 		uri = uri.replace('http:','https:');
-	
+
+	var post_xhr = new XMLHttpRequest();
 	post_xhr.open('POST', uri, true);
 
 	post_xhr.onreadystatechange = function () {
@@ -873,7 +897,7 @@ function post_hiscore(uri)
   
 
 	(function() {
-	  var memoryInitializer = 'temp.html.mem?v=1.2';
+	  var memoryInitializer = 'temp.html.mem?v=1.3';
 	  if (typeof Module['locateFile'] === 'function') {
 		memoryInitializer = Module['locateFile'](memoryInitializer);
 	  } else if (Module['memoryInitializerPrefixURL']) {
@@ -886,7 +910,7 @@ function post_hiscore(uri)
 	})();
 
 	var script = document.createElement('script');
-	script.src = "temp.js?v=1.2";
+	script.src = "temp.js?v=1.3";
 	document.body.appendChild(script);
 
 	</script>
