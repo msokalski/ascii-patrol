@@ -866,6 +866,7 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 			data.sticky = 0;
 			data.mus_vol = 16; // 0..32
 			data.sfx_vol = 16; // 0..32
+			set_gain((data.mus_vol*100+16)/32,(data.sfx_vol*100+16)/32);
 
 			return 20;
 		}
