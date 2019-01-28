@@ -3457,7 +3457,7 @@ int RunMenu(CON_OUTPUT* s)
 		if (1)
 		{
 			char buf[81];
-			int len = sprintf_s(buf,81,"ascii-patrol ver. alpha 1.3 by Gumix");
+			int len = sprintf_s(buf,81,"ascii-patrol ver. alpha 1.4 by Gumix");
 			menu_print(s, (s->w - len)/2, s->h-1, buf,(unsigned char)0x8F, len, 0);
 		}
 
