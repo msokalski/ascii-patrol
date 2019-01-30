@@ -20,6 +20,13 @@ AP can be easily built and runs great on Raspberry PI!
 
 Find me on Twitter: @MrGumix
 
+## Give it a try on any HTML5 browser
+- http://ascii-patrol.com/area51/ascii-patrol-html5.html
+
+## Quick install on Linux with *snap*
+- ```sudo snap install ascii-patrol```
+- https://snapcraft.io/ascii-patrol
+  snapped by @popeye
 
 ## Need a package? Try these:
 Arch Linux:
