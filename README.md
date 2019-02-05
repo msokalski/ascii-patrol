@@ -24,9 +24,9 @@ Find me on Twitter: @MrGumix
 - http://ascii-patrol.com/area51/ascii-patrol-html5.html
 
 ## Quick install on Linux with *snap*
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/ascii-patrol) snapped by @popey
 - ```sudo snap install ascii-patrol```
-- https://snapcraft.io/ascii-patrol
-  snapped by @popey
+
 
 ## Need a package? Try these:
 Arch Linux:
