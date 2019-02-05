@@ -26,7 +26,7 @@ Find me on Twitter: @MrGumix
 ## Quick install on Linux with *snap*
 - ```sudo snap install ascii-patrol```
 - https://snapcraft.io/ascii-patrol
-  snapped by @popeye
+  snapped by @popey
 
 ## Need a package? Try these:
 Arch Linux:
