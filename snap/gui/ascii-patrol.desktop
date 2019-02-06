@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Ascii Patrol
+Exec=ascii-patrol
+Comment=Ascii Patrol is an ASCII game project. It was mainly inspired by "Moon Patrol"
+Icon=${SNAP}/meta/gui/ascii-patrol.png
+Type=Application
+Terminal=true
+StartupNotify=false
+Categories=Game;

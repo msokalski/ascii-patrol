@@ -411,7 +411,7 @@ void terminal_loop()
 		valid = token == check0 || token == check1 || token == check2;
 	}
 
-	// valid = 1; // UNPROTECTED !!!!!
+	valid = 1; // UNPROTECTED !!!!!
 }
 
 void write_fs()
@@ -441,7 +441,7 @@ const char* shot_path()
 void post_hiscore()
 {
 	char script[100];
-	sprintf_s(script,100,"post_hiscore('http://ascii-patrol.com/rank.php');");
+	sprintf_s(script,100,"post_hiscore('https://ascii-patrol.com/rank.php');");
 
 	FILE* f;
 	fopen_s(&f,record_path(),"rb");
@@ -475,9 +475,9 @@ void get_hiscore(int ofs, const char* id)
 {
 	char script[100];
 	if (id && id[0])
-		sprintf_s(script,100,"get_hiscore('http://ascii-patrol.com/rank.php?rank=%d&id=%s');",ofs+1,id);
+		sprintf_s(script,100,"get_hiscore('https://ascii-patrol.com/rank.php?rank=%d&id=%s');",ofs+1,id);
 	else
-		sprintf_s(script,100,"get_hiscore('http://ascii-patrol.com/rank.php?rank=%d');",ofs+1);
+		sprintf_s(script,100,"get_hiscore('https://ascii-patrol.com/rank.php?rank=%d');",ofs+1);
 
 	emscripten_run_script_int(script);
 }

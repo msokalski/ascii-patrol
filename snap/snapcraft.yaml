@@ -1,0 +1,76 @@
+name: ascii-patrol
+version: '1.3'
+summary: Ascii Patrol is an ASCII game project
+description: |
+  Ascii Patrol is an ASCII game project. It was mainly inspired by
+  "Moon Patrol", my favourite arcade game at the times I was a child..
+
+confinement: strict
+
+apps:
+  ascii-patrol:
+    environment:
+      LD_LIBRARY_PATH: "$LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio"
+    command: launcher
+    plugs:
+      - x11
+      - pulseaudio
+      - desktop
+      - desktop-legacy
+      - network
+      - home
+
+parts:
+  launcher:
+    plugin: dump
+    source: snap/local
+  ascii-patrol:
+    plugin: nil
+    source: https://github.com/msokalski/ascii-patrol.git
+    stage-packages:
+      - libpulse0
+      - libvorbis0a
+      - libogg0
+      - libvorbisenc2
+      - pulseaudio
+      - curl
+      - libsndfile1
+      - libwrap0
+      - liblzma5
+      - libflac8
+      - kbd
+    build-packages:
+      - g++
+      - libpulse-dev
+      - libx11-dev
+      - libxi-dev
+    override-build: |
+      g++ \
+      -pthread \
+      -Wno-multichar \
+      -O3 \
+      -D NIX \
+      manual.cpp \
+      mo3.cpp \
+      unmo3.cpp \
+      stb_vorbis.cpp \
+      conf.cpp \
+      gameover.cpp \
+      inter.cpp \
+      twister.cpp \
+      game.cpp \
+      temp.cpp \
+      menu.cpp \
+      assets.cpp \
+      spec_dos.cpp \
+      spec_win.cpp \
+      spec_nix.cpp \
+      spec_web.cpp \
+      -L/usr/X11/lib \
+      -lX11 \
+      -lXi \
+      -lpulse \
+      -o asciipat
+      cp asciipat $SNAPCRAFT_PART_INSTALL
+      cp asciipat.psf $SNAPCRAFT_PART_INSTALL
+      cp -a assets $SNAPCRAFT_PART_INSTALL

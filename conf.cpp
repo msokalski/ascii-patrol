@@ -127,6 +127,11 @@ void LoadConf()
 		conf_control  = conf.conf_control;
 	}
 
+	conf_campaign.course=0;
+	conf_campaign.level=0;
+	conf_campaign.passed=2;
+
+
 	LoadMenu();
 }
 
