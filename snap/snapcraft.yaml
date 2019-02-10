@@ -1,5 +1,5 @@
 name: ascii-patrol
-version: '1.3'
+version: '1.4'
 summary: Ascii Patrol is an ASCII game project
 description: |
   Ascii Patrol is an ASCII game project. It was mainly inspired by
@@ -73,4 +73,4 @@ parts:
       -o asciipat
       cp asciipat $SNAPCRAFT_PART_INSTALL
       cp asciipat.psf $SNAPCRAFT_PART_INSTALL
-      cp -a assets $SNAPCRAFT_PART_INSTALL
+#     cp -a assets $SNAPCRAFT_PART_INSTALL
