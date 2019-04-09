@@ -1,3 +1,5 @@
+[![Snap Status](https://build.snapcraft.io/badge/msokalski/ascii-patrol.svg)](https://build.snapcraft.io/user/msokalski/ascii-patrol)
+
 # ascii-patrol
 Ascii Patrol is an ASCII game project. It was mainly inspired by "Moon Patrol", my favourite arcade game at the times I was a child.
 
