@@ -14,6 +14,9 @@
 
 #include "twister.h"
 
+// remove!
+void DBG(const char* str);
+
 HISCORE hiscore = 
 {
 	0,0,0,"",""
@@ -462,7 +465,9 @@ static struct
 	int org_y;
 	int cur_x;
 	int cur_y;
-} touch_scroll = {-1,0,0,0,0};
+	bool dirty;
+	bool redirect;
+} touch_scroll = {-1,0,0,0,0,false,false};
 
 static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 {
@@ -769,19 +774,11 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 			mw->module[j].right = mw->module + right;
 	}
 
-	// scroll by touch?
-	if (touch_scroll.org_scroll>=0)
-	{
-		mw->scroll = mw->smooth = mw->fsmooth = touch_scroll.org_scroll - (touch_scroll.cur_y - touch_scroll.org_y);
-	}
-	else
-	{
-		// smooth scroll to hovered mod
-		if (mw->focus->dy - window.t - mw->scroll < 0)
-			mw->scroll = mw->focus->dy - window.t;
-		if (mw->focus->dy+mw->focus->h - window.t - mw->scroll > client_h)
-			mw->scroll = mw->focus->dy+mw->focus->h - window.t - client_h;
-	}
+	// smooth scroll to hovered mod
+	if (mw->focus->dy - window.t - mw->scroll < 0)
+		mw->scroll = mw->focus->dy - window.t;
+	if (mw->focus->dy+mw->focus->h - window.t - mw->scroll > client_h)
+		mw->scroll = mw->focus->dy+mw->focus->h - window.t - client_h;
 }
 
 enum MODULE_MSG
@@ -3490,6 +3487,163 @@ int RunMenu(CON_OUTPUT* s)
 			read_input(ir,4,&irn);
 			for (int i=0; i<irn; i++)
 			{
+				if (ir[i].EventType == CON_INPUT_TCH_BEGIN)
+				{
+					DBG("begin\n");
+
+					int tx = ir[i].Event.TouchEvent.x;
+					int ty = ir[i].Event.TouchEvent.y;
+					for (int j=0; j<mw->modules; j++)
+					{
+						MODULE* m = mw->module + j;
+						int x = m->x + 1/*+ (module.l+2)*/;
+						int y = m->y + 1 /*+ (module.t+1)*/ - menu_window.smooth;
+						int w = m->w - 2;
+						int h = m->h - 1;
+
+						if ( tx >= x && tx < x+w && ty >= y && ty < y+h)
+						{
+							if (mw->focus == m && mw->focus->state == 2)
+							{
+								// redirect
+								touch_scroll.redirect = true;
+								touch_scroll.dirty = false;
+								touch_scroll.org_scroll = -1;
+								break;
+							}
+						}
+					}
+
+					// otherwise check one more thing:
+					// if touch hits scroll 'page' indicator we will operate in oposite direction
+					// ...
+
+					if (!touch_scroll.redirect)
+					{
+						touch_scroll.dirty = false;
+						touch_scroll.org_scroll = mw->smooth;
+						touch_scroll.org_x = touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
+						touch_scroll.org_y = touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
+					}
+					else
+					{
+						// redirect touch?
+					}
+				}
+
+				if (ir[i].EventType == CON_INPUT_TCH_MOVE)
+				{
+					DBG("move\n");
+
+					if (!touch_scroll.redirect)
+					{
+						if (touch_scroll.cur_x != ir[i].Event.TouchEvent.x ||
+							touch_scroll.cur_y != ir[i].Event.TouchEvent.y)
+						{
+							touch_scroll.dirty = true;
+							touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
+							touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
+
+							if (mw->height > client_h) // allowable scroll
+							{
+								mw->scroll = touch_scroll.org_scroll - (touch_scroll.cur_y - touch_scroll.org_y);
+								if (mw->scroll < 0)
+									mw->scroll = 0;
+								if (mw->scroll > mw->height - client_h + 1)
+									mw->scroll = mw->height - client_h + 1;
+							}
+
+						}
+					}
+					else
+					{
+						// redirect touch?
+					}
+				}
+
+				if (ir[i].EventType == CON_INPUT_TCH_END)
+				{
+					DBG("end\n");
+					if (!touch_scroll.dirty && !touch_scroll.redirect)
+					{
+						bool defocus = true;
+
+						int tx = ir[i].Event.TouchEvent.x;
+						int ty = ir[i].Event.TouchEvent.y;
+						for (int j=0; j<mw->modules; j++)
+						{
+							MODULE* m = mw->module + j;
+							int x = m->x + 1 /*+ (module.l+2)*/;
+							int y = m->y + 1 /*+ (module.t+1)*/ - menu_window.smooth;
+							int w = m->w - 2;
+							int h = m->h - 1;
+
+							if ( tx >= x && tx < x+w && ty >= y && ty < y+h)
+							{
+								if (mw->focus != m)
+								{
+									int fl=1;
+									int ey=0;
+									if (mw->focus->proc)
+										mw->focus->proc(mw->focus,MM_FOCUS,&fl,&ey);
+
+									// * -> none
+									if (m)
+										mw->focus->state = 0;
+									else
+									{
+										mw->state = 0;
+										mw->focus->state = 1;
+									}
+								}
+
+								if (m && m->state!=2)
+								{
+									mw->focus = m;
+
+									int fl=2;
+									int ey=0;
+									if (mw->focus->proc)
+										mw->focus->proc(mw->focus,MM_FOCUS,&fl,&ey);
+
+									mw->state = 1;
+									mw->focus->state = 2;
+
+									defocus = false;
+
+									// ensure full visibility
+									if (mw->focus->dy - window.t - mw->scroll < 0)
+										mw->scroll = mw->focus->dy - window.t;
+									if (mw->focus->dy+mw->focus->h - window.t - mw->scroll > client_h)
+										mw->scroll = mw->focus->dy+mw->focus->h - window.t - client_h;
+								}
+
+								break;
+							}
+						}
+
+						if (defocus && mw->focus->state == 2)
+						{
+							int fl=1;
+							int ey=0;
+							if (mw->focus->proc)
+								mw->focus->proc(mw->focus,MM_FOCUS,&fl,&ey);
+
+							mw->state = 0;
+							mw->focus->state = 1;
+						}
+					}
+
+					if (touch_scroll.redirect)
+					{
+						// redirect touch?
+					}
+
+					touch_scroll.dirty = false;
+					touch_scroll.org_scroll = -1;
+					touch_scroll.redirect = false;
+				}
+
 				int input_handled=0;
 				
 				if (mw->state==1) // module is focused!
@@ -3504,24 +3658,6 @@ int RunMenu(CON_OUTPUT* s)
 							return -3;
 						}
 					}
-				}
-
-				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_BEGIN)
-				{
-					touch_scroll.org_scroll = mw->smooth;
-					touch_scroll.org_x = touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
-					touch_scroll.org_y = touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
-				}
-
-				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_MOVE)
-				{
-					touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
-					touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
-				}
-
-				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_END)
-				{
-					touch_scroll.org_scroll = -1;
 				}
 
 				if (!input_handled && ir[i].EventType == CON_INPUT_KBD)

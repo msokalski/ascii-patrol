@@ -1,6 +1,8 @@
 #ifndef SPEC_H
 #define SPEC_H
 
+void DBG(const char* str);
+
 struct MODAL
 {
 	virtual ~MODAL() {}

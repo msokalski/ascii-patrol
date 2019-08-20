@@ -16,6 +16,10 @@
 #pragma comment(lib,"dsound.lib")
 #pragma comment(lib,"dxguid.lib")
 
+void DBG(const char* str)
+{
+	OutputDebugStringA(str);
+}
 
 #include "spec.h"
 #include "conf.h"
@@ -700,8 +704,12 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 			{
 				case MOUSE_EVENT:
 				{
-					static bool was_down = 0;
+					static bool down = 0;
+
+					bool was_down = down;
 					bool is_down = 0 != (win_ir[k].Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED);
+
+					down = is_down;
 
 					if (was_down && is_down)
 						ir[i+k].EventType = CON_INPUT_TCH_MOVE;
@@ -723,7 +731,6 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 					sprintf_s(dbg,64,"%5s %d,%d\n", dbg_name[ir[i+k].EventType - CON_INPUT_TCH_BEGIN], ir[i+k].Event.TouchEvent.x, ir[i+k].Event.TouchEvent.y);
 					OutputDebugStringA(dbg);
 
-					was_down = is_down;
 					break;
 				}
 
