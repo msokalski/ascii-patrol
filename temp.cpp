@@ -2174,11 +2174,12 @@ int main(int argc, char* argv[])
 
 	get_hiscore(0,"");
 
-	int cols,rows;
-	int prefix_args = terminal_init(0,0,&cols,&rows);
 	atexit(terminal_done);
 
 	init_sound();
+
+	int cols,rows;
+	int prefix_args = terminal_init(0,0,&cols,&rows);
 
 	modal = &intro_modal;
 

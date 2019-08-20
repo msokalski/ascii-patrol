@@ -101,6 +101,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>-s SAFE_HEAP=1 -s EXPORTED_FUNCTIONS="['_LoadConf','_set_input','_set_output','_set_hiscore','_main','_get_audio','_set_audio','_get_sfx_count','_get_sfx_arr','_get_sfx_len','_get_sfx_data','_del_sfx']" -s ASSERTIONS=2 -s NO_EXIT_RUNTIME=1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CustomBuildStep>
+      <Command>echo Deploying to $(OutDir) ...
+copy "$(OutDir)temp.js" "C:\xampp\htdocs\ascii-patrol.com\area53\temp.js"
+copy "$(OutDir)temp.html.mem" "C:\xampp\htdocs\ascii-patrol.com\area53\temp.html.mem"
+</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>C:\xampp\htdocs\ascii-patrol.com\area53\temp.js;C:\xampp\htdocs\ascii-patrol.com\area53\temp.html.mem</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -140,6 +149,15 @@
       <LinkerOptimizationLevel>O3</LinkerOptimizationLevel>
       <RunClosureCompiler>true</RunClosureCompiler>
     </Link>
+    <CustomBuildStep>
+      <Command>echo Deploying to $(OutDir) ...
+copy "$(OutDir)temp.js" "C:\xampp\htdocs\ascii-patrol.com\area53\temp.js"
+copy "$(OutDir)temp.html.mem" "C:\xampp\htdocs\ascii-patrol.com\area53\temp.html.mem"
+</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>C:\xampp\htdocs\ascii-patrol.com\area53\temp.js;C:\xampp\htdocs\ascii-patrol.com\area53\temp.html.mem</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="sketch.txt" />

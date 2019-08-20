@@ -455,6 +455,15 @@ static WINDOW menu_window;
 
 static MENU_ASSET backdrop(&menu_bkg);
 
+static struct
+{
+	int org_scroll; // must be >=0, otherwise it is inactive
+	int org_x;
+	int org_y;
+	int cur_x;
+	int cur_y;
+} touch_scroll = {-1,0,0,0,0};
+
 static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 {
 	WINDOW* mw = &menu_window;
@@ -760,11 +769,19 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 			mw->module[j].right = mw->module + right;
 	}
 
-	// smooth scroll to hovered mod
-	if (mw->focus->dy - window.t - mw->scroll < 0)
-		mw->scroll = mw->focus->dy - window.t;
-	if (mw->focus->dy+mw->focus->h - window.t - mw->scroll > client_h)
-		mw->scroll = mw->focus->dy+mw->focus->h - window.t - client_h;
+	// scroll by touch?
+	if (touch_scroll.org_scroll>=0)
+	{
+		mw->scroll = mw->smooth = mw->fsmooth = touch_scroll.org_scroll - (touch_scroll.cur_y - touch_scroll.org_y);
+	}
+	else
+	{
+		// smooth scroll to hovered mod
+		if (mw->focus->dy - window.t - mw->scroll < 0)
+			mw->scroll = mw->focus->dy - window.t;
+		if (mw->focus->dy+mw->focus->h - window.t - mw->scroll > client_h)
+			mw->scroll = mw->focus->dy+mw->focus->h - window.t - client_h;
+	}
 }
 
 enum MODULE_MSG
@@ -3487,6 +3504,24 @@ int RunMenu(CON_OUTPUT* s)
 							return -3;
 						}
 					}
+				}
+
+				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_BEGIN)
+				{
+					touch_scroll.org_scroll = mw->smooth;
+					touch_scroll.org_x = touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
+					touch_scroll.org_y = touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
+				}
+
+				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_MOVE)
+				{
+					touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
+					touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
+				}
+
+				if (!input_handled && ir[i].EventType == CON_INPUT_TCH_END)
+				{
+					touch_scroll.org_scroll = -1;
 				}
 
 				if (!input_handled && ir[i].EventType == CON_INPUT_KBD)

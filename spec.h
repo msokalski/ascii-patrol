@@ -33,6 +33,10 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 #define CON_INPUT_FOC 0x0002
 #define CON_INPUT_UNK 0xFFFF
 
+#define CON_INPUT_TCH_BEGIN 0x0003
+#define CON_INPUT_TCH_MOVE  0x0004
+#define CON_INPUT_TCH_END   0x0005
+
 // non-ascii key mappings
 // BUT: bkspc=8, tab=9, esc=27, enter=13
 #define KBD_LT	1
@@ -45,7 +49,6 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 #define KBD_END 15
 #define KBD_PUP 16
 #define KBD_PDN	17
-
 
 struct CON_INPUT
 {
@@ -65,6 +68,12 @@ struct CON_INPUT
 		{
 			bool bSetFocus;
 		} FocusEvent;
+
+		struct
+		{
+			int x,y;
+			int id;
+		} TouchEvent;
 
     } Event;
 };

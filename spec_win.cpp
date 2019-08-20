@@ -698,6 +698,35 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 		{
 			switch (win_ir[k].EventType)
 			{
+				case MOUSE_EVENT:
+				{
+					static bool was_down = 0;
+					bool is_down = 0 != (win_ir[k].Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED);
+
+					if (was_down && is_down)
+						ir[i+k].EventType = CON_INPUT_TCH_MOVE;
+					else
+					if (was_down && !is_down)
+						ir[i+k].EventType = CON_INPUT_TCH_END;
+					else
+					if (!was_down && is_down)
+						ir[i+k].EventType = CON_INPUT_TCH_BEGIN;
+					else
+						break; // skip hovering
+
+					ir[i+k].Event.TouchEvent.id = 0;
+					ir[i+k].Event.TouchEvent.x = win_ir[k].Event.MouseEvent.dwMousePosition.X;
+					ir[i+k].Event.TouchEvent.y = win_ir[k].Event.MouseEvent.dwMousePosition.Y;
+
+					char dbg[64];
+					const char* dbg_name[] = {"BEGIN", "MOVE", "END"};
+					sprintf_s(dbg,64,"%5s %d,%d\n", dbg_name[ir[i+k].EventType - CON_INPUT_TCH_BEGIN], ir[i+k].Event.TouchEvent.x, ir[i+k].Event.TouchEvent.y);
+					OutputDebugStringA(dbg);
+
+					was_down = is_down;
+					break;
+				}
+
 				case KEY_EVENT:
 				{
 					#ifdef SIMULATE_STICKY
@@ -831,7 +860,6 @@ static const unsigned char ansi_pal[16*4] =
 	255,255,255,  0
 };
 
-
 int terminal_init(int argc, char* argv[], int* dw, int* dh)
 {
 	LoadConf();
@@ -849,7 +877,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 	SetConsoleOutputCP(437);
 	DWORD mode;
 	GetConsoleMode(stdout_handle,&mode);
-	if (mode&ENABLE_WRAP_AT_EOL_OUTPUT)
+	//if (mode&ENABLE_WRAP_AT_EOL_OUTPUT)
 	{
 		mode^=ENABLE_WRAP_AT_EOL_OUTPUT;
 		SetConsoleMode(stdout_handle,mode);
@@ -859,9 +887,11 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 	GetConsoleScreenBufferInfo(stdout_handle,&sbi);
 
 	stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
+	mode = ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT;
+	BOOL ok = SetConsoleMode(stdin_handle, mode);
 
 	CONSOLE_CURSOR_INFO ci={100,FALSE};
-	SetConsoleCursorInfo(stdout_handle,&ci);
+	//SetConsoleCursorInfo(stdout_handle,&ci);
 
 	int cols = max(80,sbi.srWindow.Right - sbi.srWindow.Left + 1);
     int rows = max(25,sbi.srWindow.Bottom - sbi.srWindow.Top + 1);
