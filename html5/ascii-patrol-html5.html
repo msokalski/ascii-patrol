@@ -2,14 +2,25 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
     <meta http-equiv="Cache-Control" content="no-cache" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<link rel="manifest" href="ascii-patrol-html5.json">
+
     <title>ASCII PATROL</title>
 
 <script>
+
 /*
 
 Copyright (C) 2016 Marcin Sokalski
@@ -36,6 +47,20 @@ Even though a license fee is not paid for the use of Freeware Version software, 
 
 */
 
+	if ('serviceWorker' in navigator) {
+		window.addEventListener('load', function () {
+			navigator.serviceWorker.register('ascii-patrol-sw.js').then(function (registration) {
+				// Registration was successful
+				console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+			}, function (err) {
+				// registration failed :(
+				console.log('ServiceWorker registration failed: ', err);
+			});
+		});
+	}
+
+/*
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -43,6 +68,7 @@ Even though a license fee is not paid for the use of Freeware Version software, 
 
   ga('create', 'UA-75309032-1', 'auto');
   ga('send', 'pageview');
+*/
 
 </script>
 	
@@ -142,6 +168,19 @@ Even though a license fee is not paid for the use of Freeware Version software, 
 	
 <script>
 
+function DBG(ptr)
+{
+	var txt = "";
+	while (true)
+	{
+		var c = Module.HEAPU8/*.buffer*/[ptr++];
+		if (!c)
+			break;
+		txt += String.fromCharCode(c);
+	}
+	console.log(txt);
+}
+
 var width = 160;
 var height = 50;
 
@@ -158,6 +197,8 @@ var height_uniform = null;
 var coords_rect;
 
 var set_input;
+var set_touch;
+
 var set_output;
 var set_hiscore;
 
@@ -437,7 +478,7 @@ function toggleFullScreen()
   }
 }
 
-window.onkeyup = function(event)
+function input_keyup(event)
 {
     if (event.defaultPrevented) {
        return;
@@ -458,11 +499,196 @@ window.onkeyup = function(event)
 	}
 }
 
-window.onkeydown = function(event)
+
+var mouse_touch = false;
+var mouse_x, mouse_y;
+function input_mousedown(event)
+{
+	event.preventDefault();
+
+	if (set_touch && event.button === 0 && !mouse_touch)
+	{
+		var x = event.pageX;
+		var y = event.pageY;
+		var id = 0;
+
+		// convert x,y from client space pixels to canvas space glyphs
+		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+		mouse_x = x;
+		mouse_y = y;
+
+		set_touch(0x10000000,x,y,id);
+		mouse_touch = true;
+
+		console.log("BEGIN " + x + "," + y + "," + id);
+	}
+}
+
+function input_mousemove(event)
+{
+	event.preventDefault();
+
+	if (set_touch && mouse_touch)
+	{
+		var x = event.pageX;
+		var y = event.pageY;
+		var id = 0;
+
+		// convert x,y from client space pixels to canvas space glyphs
+		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+		if (x != mouse_x || y != mouse_y)
+		{
+			mouse_x = x;
+			mouse_y = y;
+
+			set_touch(0x10000001,x,y,id);
+			console.log("MOVE " + x + "," + y + "," + id);
+		}
+	}
+}
+
+function input_mouseup(event)
+{
+	event.preventDefault();
+
+	if (set_touch && event.button === 0 && mouse_touch)
+	{
+		var x = event.pageX;
+		var y = event.pageY;
+		var id = 0;
+
+		// convert x,y from client space pixels to canvas space glyphs
+		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+		set_touch(0x10000002, x,y,id);
+
+		mouse_touch = false;
+
+		console.log("END " + x + "," + y + "," + id);
+	}
+}
+
+
+var touches = {};
+var touch_mask = 0x0;
+
+function input_touchstart(event)
+{
+	event.preventDefault();
+
+	if (set_touch)
+	{
+		var data = event.changedTouches;
+		for (var i=0; i<data.length; i++)
+		{
+			// no more free touches
+			if (touch_mask === 0xFFFF)
+				break;
+				
+			var id = 0;
+			for (var bit=0; bit<16; bit++)
+			{
+				if ( (touch_mask & (1<<bit)) === 0 )
+				{
+					id = bit+1;
+					break;
+				}
+			}
+
+			var x = data[i].pageX;
+			var y = data[i].pageY;
+			var key = data[i].identifier;
+
+			// convert x,y from client space pixels to canvas space glyphs
+			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+			touches[key] = { 'x':x, 'y':y, 'id':id };
+
+			set_touch(0x10000000,x,y,id);
+
+			console.log("BEGIN " + x + "," + y + "," + id + " ("+key+")");
+		}
+	}
+}
+
+function input_touchmove(event)
+{
+	event.preventDefault();
+
+	if (set_touch)
+	{
+		var data = event.changedTouches;
+		for (var i=0; i<data.length; i++)
+		{
+			var key = data[i].identifier;
+
+			var t = touches[key];
+			if (!t)
+				continue;
+
+			var x = data[i].pageX;
+			var y = data[i].pageY;
+
+			// convert x,y from client space pixels to canvas space glyphs
+			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+			if (x!= t.x || y!= t.y)
+			{
+				t.x = x;
+				t.y = y;
+				set_touch(0x10000001,x,y,t.id);
+
+				console.log("MOVE " + x + "," + y + "," + id + " ("+key+")");
+			}
+		}
+	}
+}
+
+function input_touchendcancel(event)
+{
+	event.preventDefault();
+
+	if (set_touch)
+	{
+		var data = event.changedTouches;
+		for (var i=0; i<data.length; i++)
+		{
+			var key = data[i].identifier;
+
+			var t = touches[key];
+			if (!t)
+				continue;
+
+			var x = data[i].pageX;
+			var y = data[i].pageY;
+			var id = t.id;
+
+			// convert x,y from client space pixels to canvas space glyphs
+			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+
+			set_touch(0x10000002, x,y,id);
+			touches[key] = null;
+			touch_mask &= ~(1<<(id-1));
+
+			console.log("END " + x + "," + y + "," + id + " ("+key+")");
+		}
+	}
+}
+
+function input_keydown(event)
 {
     if (event.defaultPrevented) {
        return;
     }
+
     var handled = false;
 	
 	if (!event.ctrlKey && !event.altKey && event.keyCode!=16)
@@ -498,9 +724,34 @@ window.onkeydown = function(event)
     if (handled) {
        event.preventDefault();
     };
-};
+}
+
+function SetInputHandlers(elem)
+{
+	elem.addEventListener('keydown', input_keydown, { passive: false });
+	elem.addEventListener('keyup', input_keyup, { passive: false });
+	
+	elem.addEventListener('touchstart', input_touchstart, { passive: false });
+	elem.addEventListener('touchmove', input_touchmove, { passive: false });
+	elem.addEventListener('touchend', input_touchendcancel, { passive: false });
+	elem.addEventListener('touchcancel', input_touchendcancel, { passive: false });
+
+	elem.addEventListener('click', function(ev) { alert(); }, { passive: false });
+	elem.addEventListener('mousedown', input_mousedown, { passive: false });
+	elem.addEventListener('mousemove', input_mousemove, { passive: false });
+	elem.addEventListener('mouseup', input_mouseup, { passive: false });
+}
+
 
 var back_buffer = null;
+
+var touch_rect_x=0;
+var touch_rect_y=0;
+var touch_rect_w=1;
+var touch_rect_h=1;
+var touch_rect_u=1;
+var touch_rect_v=1;
+
 function resize(e)
 {
 
@@ -564,11 +815,20 @@ function resize(e)
 
 	vp_w *= realToCSSPixels;
 	vp_h *= realToCSSPixels;
+
+
+	touch_rect_w = dw;
+	touch_rect_h = dh;
+	touch_rect_x = Math.floor( (w - dw)/2 );
+	touch_rect_y = Math.floor( (h - dh)/2 );
+	touch_rect_u = width;
+	touch_rect_v = height;
 	
 	ctx.canvas.style.width = "" + dw + "px";
 	ctx.canvas.style.height = "" + dh + "px";
 	ctx.canvas.style.left = "" + Math.floor( (w - dw)/2 ) + "px";
 	ctx.canvas.style.top = "" + Math.floor( (h - dh)/2 ) + "px";
+
 
 	if (render == render_3d)
 	{
@@ -864,40 +1124,44 @@ function post_hiscore(uri)
 
     <script type='text/javascript'>
 
-	var init_api = function()
-	{
-		set_input = Module.cwrap('set_input', null, ['number']);
-		set_output = Module.cwrap('set_output', 'number', ['number', 'number']);
-		set_hiscore = Module.cwrap('set_hiscore', null, ['string']);
-		
-		set_audio = Module.cwrap('set_audio', 'number',  ['number', 'number', 'number']);
-		get_audio = Module.cwrap('get_audio', null,  ['number', 'number', 'number']);
-		
-		get_sfx_count = Module.cwrap('get_sfx_count', 'number', []);
-		get_sfx_arr = Module.cwrap('get_sfx_arr', 'number', []);
-		get_sfx_len = Module.cwrap('get_sfx_len', 'number', ['number']);
-		get_sfx_data = Module.cwrap('get_sfx_data', 'number', ['number']);
-		del_sfx = Module.cwrap('del_sfx', null, ['number']);
-		
-		
-		if (set_audio && get_audio)
-			init_audio();
-			
-		setTimeout(fade_navi,2000/*12000*/);
-	};
+    	var init_api = function () {
+
+    		SetInputHandlers(window);
+
+    		set_input = Module.cwrap('set_input', null, ['number']);
+    		set_touch = Module.cwrap('set_touch', null, ['number', 'number', 'number', 'number']);
+
+    		set_output = Module.cwrap('set_output', 'number', ['number', 'number']);
+    		set_hiscore = Module.cwrap('set_hiscore', null, ['string']);
+
+    		set_audio = Module.cwrap('set_audio', 'number', ['number', 'number', 'number']);
+    		get_audio = Module.cwrap('get_audio', null, ['number', 'number', 'number']);
+
+    		get_sfx_count = Module.cwrap('get_sfx_count', 'number', []);
+    		get_sfx_arr = Module.cwrap('get_sfx_arr', 'number', []);
+    		get_sfx_len = Module.cwrap('get_sfx_len', 'number', ['number']);
+    		get_sfx_data = Module.cwrap('get_sfx_data', 'number', ['number']);
+    		del_sfx = Module.cwrap('del_sfx', null, ['number']);
+
+
+    		if (set_audio && get_audio)
+    			init_audio();
+
+    		setTimeout(fade_navi, 2000/*12000*/);
+    	};
 
 	var Module = {
 		preRun: [],
 		postRun: [init_api],
 		
-		  print: function(text) { console.log(text) },
-		  printErr: function(text) { console.error(text) }
+		  print: function(text) { /*console.log(text)*/ },
+		  printErr: function(text) { /*console.error(text)*/ }
   
 	};
   
 
 	(function() {
-	  var memoryInitializer = 'temp.html.mem?v=1.3';
+	  var memoryInitializer = 'temp.html.mem?v=1.5';
 	  if (typeof Module['locateFile'] === 'function') {
 		memoryInitializer = Module['locateFile'](memoryInitializer);
 	  } else if (Module['memoryInitializerPrefixURL']) {
@@ -910,7 +1174,7 @@ function post_hiscore(uri)
 	})();
 
 	var script = document.createElement('script');
-	script.src = "temp.js?v=1.3";
+	script.src = "temp.js?v=1.5";
 	document.body.appendChild(script);
 
 	</script>

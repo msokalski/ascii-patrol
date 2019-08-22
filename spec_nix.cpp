@@ -57,6 +57,11 @@ static Window victim; // our victim
 #include "conf.h"
 #include "menu.h"
 
+void DBG(const char* str)
+{
+}
+
+
 bool has_key_releases()
 {
 	return dpy!=0 || raw_keyboard;
@@ -789,12 +794,15 @@ static void select_events(Display *dpy, Window win)
 
 int terminal_init(int argc, char* argv[], int* dw, int* dh)
 {
+	// todo:
+	// try to setup ansi palette
+	// try to enable mouse events (enough to track moves when left button is down only)
+
 	const char* term = getenv("TERM");
 	if (strcmp(term,"linux")==0)
 		use_xterm_256 = false;
 
     initTermios();
-
 
 	LoadConf();
 
@@ -811,7 +819,6 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
     sigaction(SIGIO,   &act, NULL);
     sigaction(SIGPIPE, &act, NULL);
     sigaction(SIGALRM, &act, NULL);
-
 
     int cols,rows;
     get_wh(&cols,&rows);

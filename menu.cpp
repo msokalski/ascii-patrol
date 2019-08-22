@@ -465,9 +465,10 @@ static struct
 	int org_y;
 	int cur_x;
 	int cur_y;
-	bool dirty;
+	int id;
+	bool dirty; // scroll (don't click on touch end)
 	bool redirect;
-} touch_scroll = {-1,0,0,0,0,false,false};
+} touch_scroll = {-1,0,0,0,0,-1,false,false};
 
 static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 {
@@ -2717,10 +2718,64 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 		case MM_INPUT:
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			bool hold = GameOnHold();
+
+			if (ci->EventType == CON_INPUT_TCH_END)
+			{
+				/*
+					todo:
+					- if game is on hold:
+					  - if clicked on map: use hold_focus action
+					  - if clicked on 'resume' return -3
+					  - if clicked on 'reset' return 1
+
+					- otherwise
+					  - if clicked on map return -3 (play)
+					  - if clicked on tree, set its item focus and return 1
+
+					optionally:
+					- allow scrolling map
+				*/
+
+				// temporarily: always as click on map
+				if (hold)
+				{
+					if (data.hold_focus==0)
+					{
+						// resume
+						return -3;
+					}
+					else
+					if (data.hold_focus==1)
+					{
+						// reset
+						ClearOnHold();
+						return 1;
+					}
+				}
+				else
+				{
+					int j = data.level;
+					if (j<0)
+						j=0;
+
+					// ensure level is not a dummy
+					if (campaign[data.course].level[j].height[0])
+					{
+						// set hold focus to resume
+						data.hold_focus = 0;
+						return -3;
+					}
+
+					return 0;
+				}
+
+				break;
+			}
+
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
 			{
-				bool hold = GameOnHold();
-
 				switch (ConfMapInput(ci->Event.KeyEvent.uChar.AsciiChar))
 				{
 					// prev level/course, open & close courses if changed
@@ -3471,7 +3526,7 @@ int RunMenu(CON_OUTPUT* s)
 		if (1)
 		{
 			char buf[81];
-			int len = sprintf_s(buf,81,"ascii-patrol ver. alpha 1.4 by Gumix");
+			int len = sprintf_s(buf,81,"ascii-patrol ver. alpha 1.5 by Gumix");
 			menu_print(s, (s->w - len)/2, s->h-1, buf,(unsigned char)0x8F, len, 0);
 		}
 
@@ -3485,10 +3540,15 @@ int RunMenu(CON_OUTPUT* s)
 		while (irn)
 		{
 			read_input(ir,4,&irn);
+
+			int input_handled=0;
+
 			for (int i=0; i<irn; i++)
 			{
-				if (ir[i].EventType == CON_INPUT_TCH_BEGIN)
+				if (ir[i].EventType == CON_INPUT_TCH_BEGIN && touch_scroll.id<0)
 				{
+					touch_scroll.id = ir[i].Event.TouchEvent.id;
+
 					DBG("begin\n");
 
 					int tx = ir[i].Event.TouchEvent.x;
@@ -3520,18 +3580,15 @@ int RunMenu(CON_OUTPUT* s)
 
 					if (!touch_scroll.redirect)
 					{
+						input_handled = 1;
 						touch_scroll.dirty = false;
 						touch_scroll.org_scroll = mw->smooth;
 						touch_scroll.org_x = touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
 						touch_scroll.org_y = touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
 					}
-					else
-					{
-						// redirect touch?
-					}
 				}
 
-				if (ir[i].EventType == CON_INPUT_TCH_MOVE)
+				if (ir[i].EventType == CON_INPUT_TCH_MOVE && touch_scroll.id == ir[i].Event.TouchEvent.id)
 				{
 					DBG("move\n");
 
@@ -3544,7 +3601,7 @@ int RunMenu(CON_OUTPUT* s)
 							touch_scroll.cur_x = ir[i].Event.TouchEvent.x;
 							touch_scroll.cur_y = ir[i].Event.TouchEvent.y;
 
-							if (mw->height > client_h) // allowable scroll
+							if (mw->height >= client_h) // allowable scroll
 							{
 								mw->scroll = touch_scroll.org_scroll - (touch_scroll.cur_y - touch_scroll.org_y);
 								if (mw->scroll < 0)
@@ -3552,17 +3609,16 @@ int RunMenu(CON_OUTPUT* s)
 								if (mw->scroll > mw->height - client_h + 1)
 									mw->scroll = mw->height - client_h + 1;
 							}
-
 						}
-					}
-					else
-					{
-						// redirect touch?
+
+						input_handled = 1;
 					}
 				}
 
-				if (ir[i].EventType == CON_INPUT_TCH_END)
+				if (ir[i].EventType == CON_INPUT_TCH_END && touch_scroll.id == ir[i].Event.TouchEvent.id)
 				{
+					touch_scroll.id = -1;
+
 					DBG("end\n");
 					if (!touch_scroll.dirty && !touch_scroll.redirect)
 					{
@@ -3634,19 +3690,15 @@ int RunMenu(CON_OUTPUT* s)
 						}
 					}
 
-					if (touch_scroll.redirect)
-					{
-						// redirect touch?
-					}
+					if (!touch_scroll.redirect)
+						input_handled = 1;
 
 					touch_scroll.dirty = false;
 					touch_scroll.org_scroll = -1;
 					touch_scroll.redirect = false;
 				}
 
-				int input_handled=0;
-				
-				if (mw->state==1) // module is focused!
+				if (!input_handled && mw->state==1) // module is focused!
 				{
 					if (mw->focus->proc)
 					{

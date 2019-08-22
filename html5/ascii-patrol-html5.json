@@ -1,0 +1,14 @@
+{
+  "short_name": "Ascii Patrol",
+  "name": "Ascii Patrol - alpha 1.5",
+  "icons": [
+    {
+      "src": "ascii-patrol-html5.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "ascii-patrol-html5.html",
+  "display": "fullscreen",
+  "orientation": "landscape"
+}

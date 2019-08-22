@@ -720,7 +720,10 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 					if (!was_down && is_down)
 						ir[i+k].EventType = CON_INPUT_TCH_BEGIN;
 					else
+					{
+						ir[i+k].EventType = CON_INPUT_UNK;
 						break; // skip hovering
+					}
 
 					ir[i+k].Event.TouchEvent.id = 0;
 					ir[i+k].Event.TouchEvent.x = win_ir[k].Event.MouseEvent.dwMousePosition.X;
@@ -1061,6 +1064,10 @@ DWORD WINAPI hiscore_proc(LPVOID p)
 	{
 		_flushall();
 		err = system(hiscore_data->buf);
+
+		// why system() modifies console mode?
+		SetConsoleMode(stdin_handle,ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT);
+
 
 		// check if we need to discard this data and re-fetch
 		EnterCriticalSection(&hiscore_cs);

@@ -15,6 +15,10 @@
 #include "conf.h"
 #include "menu.h"
 
+void DBG(const char* str)
+{
+}
+
 bool has_key_releases()
 {
 	return true;

@@ -320,7 +320,10 @@ struct LEVEL_MODAL : MODAL
 
 	int chaisis_vert; 
 
-	int key_state;
+	int key_state, tch_state;
+	int tch_id[32];
+	CON_INPUT tch_quit;
+
 	int vely;
 	int posy; // grounded
 

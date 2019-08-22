@@ -17,6 +17,13 @@ static int output_width = 80;
 static int output_height = 25;
 static unsigned char* output_buffer = 0;
 
+void DBG(const char* str)
+{
+	EM_ASM_((
+		DBG($0)
+	), str);
+}
+
 int terminal_init(int argc, char* argv[], int* dw, int* dh)
 {
 	output_buffer = new unsigned char[256*64*4];
@@ -122,21 +129,44 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 int input_buffer[256];
 int input_buffer_len=0;
 
+int input_keys=0;
+int input_touches=0;
+
 bool get_input_len( int* r)
 {
 	if (r)
-		*r=input_buffer_len;
+		*r= input_keys + input_touches;
 	return true;
 }
 
 bool spec_read_input( CON_INPUT* ir, int n, int* r)
 {
-	int l = input_buffer_len;
+	int l = input_keys + input_touches;
 	int nr = n<l ? n : l;
 
+	int j = 0;
 	for (int i=0; i<nr; i++)
 	{
-		int c = input_buffer[i];
+		int c = input_buffer[j];
+
+		if (c >= 0x10000000)
+		{
+			switch (c)
+			{
+				case 0x10000000: ir[i].EventType = CON_INPUT_TCH_BEGIN; break;
+				case 0x10000001: ir[i].EventType = CON_INPUT_TCH_MOVE; break;
+				case 0x10000002: ir[i].EventType = CON_INPUT_TCH_END; break;
+			}
+
+			ir[i].Event.TouchEvent.x = input_buffer[j+1];
+			ir[i].Event.TouchEvent.y = input_buffer[j+2];
+			ir[i].Event.TouchEvent.id = input_buffer[j+3];
+
+			--input_touches;
+			j+=4;
+			continue;
+		}
+
 		ir[i].EventType = CON_INPUT_KBD;
 		ir[i].Event.KeyEvent.bKeyDown = (c&0x80)!=0;
 		ir[i].Event.KeyEvent.uChar.AsciiChar=0;
@@ -157,13 +187,16 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 			default:
 				ir[i].Event.KeyEvent.uChar.AsciiChar = c;
 		}
+
+		--input_keys;
+		j++;
 	}
 
 	if (r)
 		*r=nr;
 
-	input_buffer_len-=nr;
-	memmove(input_buffer,input_buffer+nr,input_buffer_len);
+	input_buffer_len-=j;
+	memmove(input_buffer,input_buffer+j,input_buffer_len);
 
 	return true;
 }
@@ -247,10 +280,36 @@ extern "C"
 
 	void set_input(int msg)
 	{
-		if (input_buffer_len==256)
+		if (input_buffer_len>256-1)
+		{
+			input_touches = 0;
+			input_keys = 0;
 			input_buffer_len=0;
+		}
 		input_buffer[input_buffer_len]=msg;
 		input_buffer_len++;
+		input_keys++;
+	}
+
+	void set_touch(int msg, int x, int y, int id)
+	{
+		// msg is:
+		// 0x1000 begin
+		// 0x1001 move
+		// 0x1002 end
+
+		if (input_buffer_len>256-4)
+		{
+			input_touches = 0;
+			input_keys = 0;
+			input_buffer_len=0;
+		}
+		input_buffer[input_buffer_len+0]=msg;
+		input_buffer[input_buffer_len+1]=x;
+		input_buffer[input_buffer_len+2]=y;
+		input_buffer[input_buffer_len+3]=id;
+		input_buffer_len+=4;
+		input_touches++;
 	}
 
 	unsigned char* set_output(int w, int h)

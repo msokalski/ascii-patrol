@@ -4066,6 +4066,10 @@ LEVEL_MODAL::LEVEL_MODAL(SCREEN* _s, int _lives, int _start_lives, int* _score, 
 	chaisis_vert = 0; 
 
 	key_state = 0;
+	tch_state = 0;
+	memset(tch_id,-1,sizeof(int)*32);
+	tch_quit.Event.TouchEvent.id = -1;
+
 	vely = 0;
 	posy = -1; // grounded
 
@@ -4872,6 +4876,133 @@ int LEVEL_MODAL::Run()
 		//##
 		for (int i=0; i<irn; i++)
 		{
+			if (ir[i].EventType==CON_INPUT_TCH_BEGIN)
+			{
+				if (ir[i].Event.TouchEvent.x >= s->w - (s->w>>3) && 
+					ir[i].Event.TouchEvent.y <= (s->h>>3))
+				{
+					if (tch_quit.Event.TouchEvent.id==-1)
+						tch_quit = ir[i];
+				}
+				else
+				if (ir[i].Event.TouchEvent.x < (s->w>>1))
+				{
+					if (ir[i].Event.TouchEvent.y < (s->h>>1))
+					{
+						if (!(key_state&1))
+						{
+							key_state |= 1;
+							tch_state |= 1;
+							tch_id[0/*(1<<0) == 1*/] = ir[i].Event.TouchEvent.id;
+
+							if (freeze_fr<0 && posy<0) // JUMP
+							{
+								int extra_vel = 128*speed*(wheel_vert[0]-wheel_vert[2])/(10*t_scroll_div*(wheel_pos[2]-wheel_pos[0]));
+								if (expl<0)
+								{
+									vely = 80 + extra_vel;
+									posy = -256*(chaisis_vert + 6-h) + vely;
+									PlaySFX(CAR_JUMP,&jump_voice);
+								}
+							}
+						}
+					}
+					else
+					{
+						// dn
+						key_state |= 2;
+						tch_state |= 2;
+						tch_id[1/*(1<<1) == 2*/] = ir[i].Event.TouchEvent.id;
+					}
+				}
+				else
+				if (ir[i].Event.TouchEvent.x >= (s->w>>1))
+				{
+					if (!(key_state&16))
+					{
+						key_state |= 16;
+						tch_state |= 16;
+						tch_id[4/*(1<<4) == 16*/] = ir[i].Event.TouchEvent.id;
+
+						if (freeze_fr<0 && bullets<32 && ((fr-bullet_fr)>=20 || bullet_fr<0)) // FIRE
+						{
+							if (expl<0)
+							{
+								BULLET* b = bullet+bullets;
+								bullets++;
+								b->sx = x+4;
+								b->x = t.scroll + b->sx;
+								b->y = chaisis_vert;
+								b->fr = fr;
+								b->vx = speed;
+								bullet_fr = fr;
+
+								PlaySFX(CAR_LASER);
+							}
+						}
+
+						if (freeze_fr<0 && cannon_t<0) // FIRE
+						{
+							if (expl<0)
+							{
+								cannon_t = fr;
+								cannon_x = x + 13 - 2;
+								cannon_y = chaisis_vert+2;
+								cannon_hit = false;
+
+								PlaySFX(CAR_CANNON);
+							}
+						}
+
+						Record(REC_KEY,fr,13,1); 
+					}
+				}
+			}
+			else
+			if (ir[i].EventType==CON_INPUT_TCH_MOVE)
+			{
+				if (ir[i].Event.TouchEvent.id == tch_quit.Event.TouchEvent.id)
+				{
+					if (ir[i].Event.TouchEvent.x != tch_quit.Event.TouchEvent.x ||
+						ir[i].Event.TouchEvent.y != tch_quit.Event.TouchEvent.y)
+					{
+						tch_quit.Event.TouchEvent.id = -1;
+					}
+				}
+			}
+			else
+			if (ir[i].EventType==CON_INPUT_TCH_END)
+			{
+				if (ir[i].Event.TouchEvent.id == tch_quit.Event.TouchEvent.id)
+				{
+					tch_quit.Event.TouchEvent.id = -1;
+					if (ir[i].Event.TouchEvent.x == tch_quit.Event.TouchEvent.x &&
+						ir[i].Event.TouchEvent.y == tch_quit.Event.TouchEvent.y)
+					{
+						return -2;
+					}
+				}
+
+				for (int t=0; t<32; t++)
+				{
+					if (ir[i].Event.TouchEvent.id == tch_id[t])
+					{
+						key_state &= ~(1<<t);
+						tch_state &= ~(1<<t);
+						tch_id[t] = -1;
+
+						switch (t)
+						{
+							case 0: Record(REC_KEY,fr,KBD_UP,0); break;
+							case 1: Record(REC_KEY,fr,KBD_DN,0); break;
+							case 2: Record(REC_KEY,fr,KBD_LT,0); break;
+							case 3: Record(REC_KEY,fr,KBD_RT,0); break;
+							case 4: Record(REC_KEY,fr,13,0); break;
+						}
+					}
+				}
+			}
+			else
 			if (ir[i].EventType==CON_INPUT_FOC)
 			{
 				Record(REC_FOC,fr,ir[i].Event.FocusEvent.bSetFocus,0);
@@ -4879,6 +5010,9 @@ int LEVEL_MODAL::Run()
 				if (!ir[i].Event.FocusEvent.bSetFocus)
 				{
 					key_state = 0;
+					tch_state = 0;
+					memset(tch_id,-1,sizeof(int)*32);
+					tch_quit.Event.TouchEvent.id = -1;
 				}
 			}
 			else
@@ -4939,7 +5073,7 @@ int LEVEL_MODAL::Run()
 
 				if (key)
 				{
-					if (ir[i].Event.KeyEvent.bKeyDown && !(key_state&key))
+					if (ir[i].Event.KeyEvent.bKeyDown && !(key_state&key) && !(tch_state&key))
 					{
 						//##
 						if (!HasKeyReleases())
@@ -4951,6 +5085,8 @@ int LEVEL_MODAL::Run()
 								if (key_state&8)
 								{
 									key_state &= ~8; // release right
+									tch_state &= ~8;
+									tch_id[3] = -1;
 								}
 								else
 								{
@@ -4969,6 +5105,8 @@ int LEVEL_MODAL::Run()
 								if (key_state&4)
 								{
 									key_state &= ~4; // release left
+									tch_state &= ~4;
+									tch_id[2] = -1;
 								}
 								else
 								{
@@ -4999,6 +5137,8 @@ int LEVEL_MODAL::Run()
 								if (key_state&2)
 								{
 									key_state &= ~2; // release down
+									tch_state &= ~2;
+									tch_id[1] = -1;
 								}
 								else
 								{
@@ -5143,7 +5283,7 @@ int LEVEL_MODAL::Run()
 						}
 					}
 					else
-					if (!ir[i].Event.KeyEvent.bKeyDown && (key_state&key))
+					if (!ir[i].Event.KeyEvent.bKeyDown && (key_state&key) && !(tch_state&key))
 					{
 						//##
 						// if (HasKeyReleases())
@@ -5621,6 +5761,20 @@ int InterScreenInput()
 		read_input(ir,4,&irn);
 		for (int i=0; i<irn; i++)
 		{
+			if (ir[i].EventType == CON_INPUT_TCH_END)
+			{
+				int w,h;
+				get_terminal_wh(&w,&h);
+
+				if (ir[i].Event.TouchEvent.x >= w-(w>>3) && 
+					ir[i].Event.TouchEvent.y <= (h>>3))
+				{
+					return -2;
+				}
+
+				hit = true;
+			}
+			else
 			if (ir[i].EventType == CON_INPUT_KBD && ir[i].Event.KeyEvent.uChar.AsciiChar!=0)
 			{
 				if (ir[i].Event.KeyEvent.bKeyDown)
