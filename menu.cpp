@@ -3594,7 +3594,7 @@ int RunMenu(CON_OUTPUT* s)
 
 					if (!touch_scroll.redirect)
 					{
-						if (touch_scroll.cur_x != ir[i].Event.TouchEvent.x ||
+						if ( abs(touch_scroll.cur_x - ir[i].Event.TouchEvent.x) > 1 ||
 							touch_scroll.cur_y != ir[i].Event.TouchEvent.y)
 						{
 							touch_scroll.dirty = true;

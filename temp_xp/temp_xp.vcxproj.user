@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>"C:\Users\msokalski\Desktop\REXPaint-v1.01\images" "D:\MULTIMEDIA\temp\assets.cpp" "D:\MULTIMEDIA\temp\assets.h"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>"$(ProjectDir)..\assets" "$(ProjectDir)..\assets.cpp" "$(ProjectDir)..\assets.h"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

@@ -595,6 +595,7 @@ function input_touchstart(event)
 			{
 				if ( (touch_mask & (1<<bit)) === 0 )
 				{
+					touch_mask |= 1<<bit;
 					id = bit+1;
 					break;
 				}
@@ -634,6 +635,7 @@ function input_touchmove(event)
 
 			var x = data[i].pageX;
 			var y = data[i].pageY;
+			var id = t.id;
 
 			// convert x,y from client space pixels to canvas space glyphs
 			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
@@ -643,7 +645,7 @@ function input_touchmove(event)
 			{
 				t.x = x;
 				t.y = y;
-				set_touch(0x10000001,x,y,t.id);
+				set_touch(0x10000001,x,y,id);
 
 				console.log("MOVE " + x + "," + y + "," + id + " ("+key+")");
 			}

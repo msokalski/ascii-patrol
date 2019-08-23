@@ -43,6 +43,7 @@ extern ASSET ground_boom;
 extern ASSET heap1;
 extern ASSET heap2;
 extern ASSET heap3;
+extern ASSET keyb;
 extern ASSET land_mine;
 extern ASSET map;
 extern ASSET menu_bkg;
