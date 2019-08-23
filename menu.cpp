@@ -452,6 +452,8 @@ struct WINDOW
 	const int* layout_2;
 	const int* layout_3;
 	const int* layout_4;
+
+	bool prompt_active;
 };
 
 static WINDOW menu_window;
@@ -800,6 +802,221 @@ enum MODULE_MSG
 
 void PaintScroll(CON_OUTPUT* s, int x, int dy, int h, int pos, int size, int state, const int* clip);
 
+int PromptProc(int msg, void* p1, void* p2)
+{
+	static MENU_ASSET prompt(&keyb);
+
+	enum FuncKey
+	{
+		EXIT = 1,
+		BKSPC,
+		TAB,
+		CAPSLK,
+		ENTER,
+		L_SHIFT,
+		R_SHIFT,
+		L_CTRL,
+		L_WIN,
+		L_ALT,
+		R_ALT,
+		R_WIN,
+		APP,
+		R_CTRL
+	};
+
+	struct Key
+	{
+		int ch; // if smaller than 0x20 it is some FuncKey
+		int shift_ch;
+		bool caps; // if false don't xor shift with capslk
+		int x,y,w,h;
+	};
+
+	const static Key keymap[] = 
+	{
+		{ EXIT,EXIT,       false, 72,1, 3,3 },
+		{ BKSPC,BKSPC,     false, 67,5, 8,3 },
+	//	{ TAB,TAB,         false, 2,9, 7,3 },
+		{ CAPSLK,CAPSLK,   false, 2,13, 9,3 },
+		{ ENTER,ENTER,     false, 67,13, 8,3 },
+		{ L_SHIFT,L_SHIFT, false, 2,17, 11,3 },
+		{ R_SHIFT,R_SHIFT, false, 64,17, 11,3 },
+	//	{ L_CTRL,L_CTRL,   false, 2,21, 7,3 },
+	//	{ L_WIN,L_WIN,     false, 10,21, 5,3 },
+	//	{ L_ALT,L_ALT,     false, 16,21, 5,3 },
+	//	{ R_ALT,R_ALT,     false, 50,21, 5,3 },
+	//	{ R_WIN,R_WIN,     false, 56,21, 5,3 },
+	//	{ APP,APP,         false, 62,21, 5,3 },
+	//	{ R_CTRL,R_CTRL,   false, 68,21, 7,3 },
+
+		{ '`','~', false,  2,5, 4,3 },
+		{ '1','!', false,  7,5, 4,3 },
+		{ '2','@', false, 12,5, 4,3 },
+		{ '3','#', false, 17,5, 4,3 },
+		{ '4','$', false, 22,5, 4,3 },
+		{ '5','%', false, 27,5, 4,3 },
+		{ '6','^', false, 32,5, 4,3 },
+		{ '7','&', false, 37,5, 4,3 },
+		{ '8','*', false, 42,5, 4,3 },
+		{ '9','(', false, 47,5, 4,3 },
+		{ '0',')', false, 52,5, 4,3 },
+		{ '-','_', false, 57,5, 4,3 },
+		{ '=','+', false, 62,5, 4,3 },
+
+		{ 'q','Q', true,  10,9, 4,3 },
+		{ 'w','W', true,  15,9, 4,3 },
+		{ 'e','E', true,  20,9, 4,3 },
+		{ 'r','R', true,  25,9, 4,3 },
+		{ 't','T', true,  30,9, 4,3 },
+		{ 'y','Y', true,  35,9, 4,3 },
+		{ 'u','U', true,  40,9, 4,3 },
+		{ 'i','I', true,  45,9, 4,3 },
+		{ 'o','O', true,  50,9, 4,3 },
+		{ 'p','P', true,  55,9, 4,3 },
+		{ '[','[', false, 60,9, 4,3 },
+		{ ']',']', false, 65,9, 4,3 },
+		{ '\\','|',false, 70,9, 4,3 },
+
+		{ 'a','A',   true,  12,13, 4,3 },
+		{ 's','S',   true,  17,13, 4,3 },
+		{ 'd','D',   true,  22,13, 4,3 },
+		{ 'f','F',   true,  27,13, 4,3 },
+		{ 'g','G',   true,  32,13, 4,3 },
+		{ 'h','H',   true,  37,13, 4,3 },
+		{ 'j','J',   true,  42,13, 4,3 },
+		{ 'k','K',   true,  47,13, 4,3 },
+		{ 'l','L',   true,  52,13, 4,3 },
+		{ ';',';',   false, 57,13, 4,3 },
+		{ '\'','\"', false, 62,13, 4,3 },
+
+		{ 'z','Z', true,  14,17, 4,3 },
+		{ 'x','X', true,  19,17, 4,3 },
+		{ 'c','C', true,  24,17, 4,3 },
+		{ 'v','V', true,  29,17, 4,3 },
+		{ 'b','B', true,  34,17, 4,3 },
+		{ 'n','N', true,  39,17, 4,3 },
+		{ 'm','M', true,  44,17, 4,3 },
+		{ ',','<', false, 49,17, 4,3 },
+		{ '.','>', false, 54,17, 4,3 },
+		{ '/','?', false, 59,17, 4,3 },
+
+		{ 0,0, false, 0,0, 0,0 }
+	};
+
+	struct PromptData
+	{
+		int sx, sy;
+
+		int blink;
+		int pos;
+		int len;
+		char str[256];
+
+		bool capslk;
+		bool left_shift;
+		bool right_shift;
+
+		int last_key_idx;
+		int last_key_blink;
+
+		// track touches
+		// ...
+	};
+
+	static PromptData data;
+
+	switch (msg)
+	{
+		case MM_LOAD:
+		{
+			break;
+		}
+
+		case MM_INIT:
+		{
+			break;
+		}
+
+		case MM_FOCUS:
+		{
+			int f = *(int*)p1;
+			break;
+		}
+
+		case MM_PAINT:
+		{
+			CON_OUTPUT* s = (CON_OUTPUT*)p1;
+			int* clip = (int*)p2;
+
+			data.sx = (s->w - prompt.w) / 2;
+			data.sy = s->h - prompt.h;
+
+			menu_blit(s, data.sx, data.sy, &prompt, 0,0, prompt.w, prompt.h, 0, 0);
+
+			// draw prompt (Player Name)
+			// ...
+
+			// draw string
+			// ...
+
+			// blink cursor
+			// ...
+
+			// overlay l/r_shift, capslk, last key w/blink
+			// ...
+
+			break;
+		}
+
+		case MM_INPUT:
+		{
+			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			if (ci->EventType == CON_INPUT_TCH_BEGIN)
+			{
+				int key = 0;
+				int x = ci->Event.TouchEvent.x - data.sx;
+				int y = ci->Event.TouchEvent.y - data.sy;
+
+				while (keymap[key].ch)
+				{
+					if (x>=keymap[key].x && x<keymap[key].x+keymap[key].w &&
+						y>=keymap[key].y && y<keymap[key].y+keymap[key].h)
+					{
+						// check for special keys
+						switch (keymap[key].ch)
+						{
+							case EXIT:
+								return -1;
+							case ENTER:
+								return 1;
+						}
+					}
+
+					key++;
+				}
+			}
+
+			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
+			{
+				switch (ConfMapInput(ci->Event.KeyEvent.uChar.AsciiChar))
+				{
+					case KBD_UP:
+					{
+						break;
+					}
+					case KBD_DN:
+					{
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
 
 int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 {
@@ -1782,6 +1999,13 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 		case MM_INPUT:
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			if (ci->EventType == CON_INPUT_TCH_BEGIN)
+			{
+				menu_window.prompt_active = true;
+				break;
+			}
+
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
 			{
 				if (data.edit_pos>=0)
@@ -3287,26 +3511,6 @@ static void PostPaint(CON_OUTPUT* s)
 			s->color[(s->w+1)*y+x]&=0x0F;
 		}
 	}
-
-	WINDOW* mw = &menu_window;
-
-	/*
-	// cast 'shadows' below last module in each column
-	for (int i=mw->modules - mw->columns; i<mw->modules; i++)
-	{
-		MODULE* m = mw->module + mw->layout[i];
-
-		int y = m->y + m->h - menu_window.smooth;
-		if (y<s->h - window.b)
-		{
-			for (int x=m->x; x<m->x+m->w; x++)
-			{
-				if (s->buf[x+(s->w+1)*y] != '.' && s->buf[x+(s->w+1)*y] != '_')
-					s->buf[x+(s->w+1)*y] = ' ';
-			}
-		}
-	}
-	*/
 }
 
 void PaintModule(CON_OUTPUT* s, int x, int y, int w, int h, const char* title, int state, const int* clip = 0)
@@ -3530,6 +3734,11 @@ int RunMenu(CON_OUTPUT* s)
 			menu_print(s, (s->w - len)/2, s->h-1, buf,(unsigned char)0x8F, len, 0);
 		}
 
+		if (mw->prompt_active)
+		{
+			PromptProc( MM_PAINT, (void*)s, (void*)clip );
+		}
+
 		menu_write(s,dw,dh,0,0,-1,-1);
 
 		CON_INPUT ir[4];
@@ -3545,6 +3754,13 @@ int RunMenu(CON_OUTPUT* s)
 
 			for (int i=0; i<irn; i++)
 			{
+				if (mw->prompt_active)
+				{
+					if ( PromptProc( MM_INPUT, (void*)(ir+i), 0 ) )
+						mw->prompt_active = false;
+					continue;
+				}
+
 				if (ir[i].EventType == CON_INPUT_TCH_BEGIN && touch_scroll.id<0)
 				{
 					touch_scroll.id = ir[i].Event.TouchEvent.id;
