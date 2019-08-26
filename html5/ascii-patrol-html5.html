@@ -606,10 +606,13 @@ function input_touchstart(event)
 			var key = data[i].identifier;
 
 			// convert x,y from client space pixels to canvas space glyphs
-			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+			x = (x - touch_rect_x) * touch_rect_u / touch_rect_w;
+			y = (y - touch_rect_y) * touch_rect_v / touch_rect_h;
 
-			touches[key] = { 'x':x, 'y':y, 'id':id };
+			var qx = Math.round(x);
+			var qy = Math.round(y);
+
+			touches[key] = { 'x':qx, 'y':qy, 'id':id, 'fx':x-qx, 'fy':y-qy };
 
 			set_touch(0x10000000,x,y,id);
 
@@ -638,16 +641,16 @@ function input_touchmove(event)
 			var id = t.id;
 
 			// convert x,y from client space pixels to canvas space glyphs
-			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+			var qx = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w - t.fx);
+			var qy = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h - t.fy);
 
 			if (x!= t.x || y!= t.y)
 			{
-				t.x = x;
-				t.y = y;
-				set_touch(0x10000001,x,y,id);
+				t.x = qx;
+				t.y = qy;
+				set_touch(0x10000001,qx,qy,id);
 
-				console.log("MOVE " + x + "," + y + "," + id + " ("+key+")");
+				console.log("MOVE " + qx + "," + qy + "," + id + " ("+key+")");
 			}
 		}
 	}
@@ -673,14 +676,14 @@ function input_touchendcancel(event)
 			var id = t.id;
 
 			// convert x,y from client space pixels to canvas space glyphs
-			x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-			y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+			var qx = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w - t.fx);
+			var qy = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h - t.fy);
 
-			set_touch(0x10000002, x,y,id);
+			set_touch(0x10000002, qx,qy,id);
 			touches[key] = null;
 			touch_mask &= ~(1<<(id-1));
 
-			console.log("END " + x + "," + y + "," + id + " ("+key+")");
+			console.log("END " + qx + "," + qy + "," + id + " ("+key+")");
 		}
 	}
 }

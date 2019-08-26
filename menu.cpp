@@ -802,6 +802,8 @@ enum MODULE_MSG
 
 void PaintScroll(CON_OUTPUT* s, int x, int dy, int h, int pos, int size, int state, const int* clip);
 
+int ProfileProc(MODULE* m, int msg, void* p1, void* p2);
+
 int PromptProc(int msg, void* p1, void* p2)
 {
 	static MENU_ASSET prompt(&keyb);
@@ -873,9 +875,9 @@ int PromptProc(int msg, void* p1, void* p2)
 		{ 'i','I', true,  45,9, 4,3 },
 		{ 'o','O', true,  50,9, 4,3 },
 		{ 'p','P', true,  55,9, 4,3 },
-		{ '[','[', false, 60,9, 4,3 },
-		{ ']',']', false, 65,9, 4,3 },
-		{ '\\','|',false, 70,9, 4,3 },
+		{ '[','{', false, 60,9, 4,3 },
+		{ ']','}', false, 65,9, 4,3 },
+		{ '\\','|',false, 70,9, 5,3 },
 
 		{ 'a','A',   true,  12,13, 4,3 },
 		{ 's','S',   true,  17,13, 4,3 },
@@ -886,7 +888,7 @@ int PromptProc(int msg, void* p1, void* p2)
 		{ 'j','J',   true,  42,13, 4,3 },
 		{ 'k','K',   true,  47,13, 4,3 },
 		{ 'l','L',   true,  52,13, 4,3 },
-		{ ';',';',   false, 57,13, 4,3 },
+		{ ';',':',   false, 57,13, 4,3 },
 		{ '\'','\"', false, 62,13, 4,3 },
 
 		{ 'z','Z', true,  14,17, 4,3 },
@@ -900,6 +902,8 @@ int PromptProc(int msg, void* p1, void* p2)
 		{ '.','>', false, 54,17, 4,3 },
 		{ '/','?', false, 59,17, 4,3 },
 
+		{ ' ',' ', false, 22,21, 27,3 },
+
 		{ 0,0, false, 0,0, 0,0 }
 	};
 
@@ -907,23 +911,29 @@ int PromptProc(int msg, void* p1, void* p2)
 	{
 		int sx, sy;
 
-		int blink;
-		int pos;
 		int len;
 		char str[256];
 
-		bool capslk;
+		int capslk_key;
+
 		bool left_shift;
 		bool right_shift;
 
 		int last_key_idx;
-		int last_key_blink;
+		unsigned long last_key_blink;
 
 		// track touches
 		// ...
 	};
 
-	static PromptData data;
+	static PromptData data = 
+	{
+		0,0,
+		0,"",
+		-1,
+		false,false,
+		-1,0
+	};
 
 	switch (msg)
 	{
@@ -940,6 +950,20 @@ int PromptProc(int msg, void* p1, void* p2)
 		case MM_FOCUS:
 		{
 			int f = *(int*)p1;
+
+			const char* str = (const char*)p1;
+			data.len = strlen(str);
+			strcpy(data.str,str);
+
+			data.sx = 0;
+			data.sy = -prompt.h; // outa screen
+
+			data.capslk_key = -1;
+			data.left_shift = false;
+			data.right_shift = false;
+			data.last_key_idx = -1;
+			data.last_key_blink = 0;
+
 			break;
 		}
 
@@ -953,14 +977,69 @@ int PromptProc(int msg, void* p1, void* p2)
 
 			menu_blit(s, data.sx, data.sy, &prompt, 0,0, prompt.w, prompt.h, 0, 0);
 
+			if (data.capslk_key >=0)
+			{
+				int key = data.capslk_key;
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
+			}
+
+			if (data.last_key_idx >=0)
+			{
+				int key = data.last_key_idx;
+				int dt = menu_window.time - data.last_key_blink;
+				if (dt<150)
+				{
+					menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+								keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
+				}
+				else
+					data.last_key_idx = -1;
+			}
+
 			// draw prompt (Player Name)
-			// ...
+			const char* prompt = "Player Name: ";
+			int x = 3 + data.sx;
+			int y = 2 + data.sy;
+
+			for (int l=0; prompt[l]; l++)
+			{
+				char* c = s->buf + (s->w+1)*y + x;
+				*c = prompt[l];
+
+				unsigned char* a = (unsigned char*)s->color + (s->w+1)*y + x;
+				*a = 0x0B; // bright yello on black
+
+				x++;
+			}
 
 			// draw string
-			// ...
+			for (int l=0; l<data.len; l++)
+			{
+				char* c = s->buf + (s->w+1)*y + x;
+				*c = data.str[l];
+
+				unsigned char* a = (unsigned char*)s->color + (s->w+1)*y + x;
+				*a = 0x0F; // white on black
+
+				x++;
+			}
 
 			// blink cursor
-			// ...
+			if ((menu_window.time & 0xFF) < 0x7F)
+			{
+				// show caret: in color mode, blink alternating fg/bg, in mono replace char with _
+				if (s->color)
+				{
+					unsigned char* c = (unsigned char*)s->color + (s->w+1)*y + x;
+					*c = 0xF0; //((*c&0xF)<<4) | ((*c>>4)&0xF); 
+				}
+				else
+				{
+					char* c = s->buf + (s->w+1)*y + x;
+					*c = '_';
+				}
+			}
 
 			// overlay l/r_shift, capslk, last key w/blink
 			// ...
@@ -972,11 +1051,66 @@ int PromptProc(int msg, void* p1, void* p2)
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
 
+			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
+			{
+				int key = 0;
+				int ch = ci->Event.KeyEvent.uChar.AsciiChar;
+
+				if (ch == 27)
+				{
+					// exit
+					return -1;
+				}
+
+				if (ch == 13)
+				{
+					// enter
+					strcpy(conf_player.name,data.str);
+					ProfileProc(0, MM_LOAD, 0,0);
+					SaveConf();
+					return 1;
+				}
+
+				if (ch==8)
+					ch = BKSPC;
+
+				while (keymap[key].ch)
+				{
+					if (ch == keymap[key].ch ||
+						ch == keymap[key].shift_ch)
+					{
+						data.last_key_idx = key;
+						data.last_key_blink = menu_window.time;
+
+						if (ch==BKSPC)
+						{
+							//bkspc
+							if (data.len)
+								data.len--;
+							data.str[data.len] = 0;
+						}
+						else
+						if (data.len < 16)
+						{
+							int c = ch;
+							data.str[data.len++] = c;
+							data.str[data.len] = 0;
+						}
+
+						break;
+					}
+
+					key++;
+				}
+			}
 			if (ci->EventType == CON_INPUT_TCH_BEGIN)
 			{
 				int key = 0;
 				int x = ci->Event.TouchEvent.x - data.sx;
 				int y = ci->Event.TouchEvent.y - data.sy;
+
+				// handle shift holds
+				// !!!
 
 				while (keymap[key].ch)
 				{
@@ -986,11 +1120,50 @@ int PromptProc(int msg, void* p1, void* p2)
 						// check for special keys
 						switch (keymap[key].ch)
 						{
+							case CAPSLK:
+								if (data.capslk_key>=0)
+									data.capslk_key = -1;
+								else
+									data.capslk_key = key;
+								break;
 							case EXIT:
 								return -1;
 							case ENTER:
+							{
+								strcpy(conf_player.name,data.str);
+								ProfileProc(0, MM_LOAD, 0,0);
+								SaveConf();
 								return 1;
+							}
+							case BKSPC:
+							{
+								data.last_key_idx = key;
+								data.last_key_blink = menu_window.time;
+
+								//bkspc
+								if (data.len)
+									data.len--;
+								data.str[data.len] = 0;
+								break;
+							}
+
+							default:
+
+								data.last_key_idx = key;
+								data.last_key_blink = menu_window.time;
+
+								if (data.len<16)
+								{
+									bool shift = data.capslk_key>=0 && keymap[key].caps;
+									if (data.left_shift || data.right_shift)
+										shift = !shift;
+
+									int c = shift ? keymap[key].shift_ch : keymap[key].ch;
+									data.str[data.len++] = c;
+									data.str[data.len] = 0;
+								}
 						}
+						break;
 					}
 
 					key++;
@@ -2002,8 +2175,70 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 
 			if (ci->EventType == CON_INPUT_TCH_BEGIN)
 			{
-				menu_window.prompt_active = true;
-				break;
+				if (ci->Event.TouchEvent.y>= m->y + 4 && ci->Event.TouchEvent.y<= m->y + 6)
+				{
+					PromptProc(MM_FOCUS,conf_player.name,0);
+					menu_window.prompt_active = true;
+					break;
+				}
+				else
+				if (ci->Event.TouchEvent.y>= m->y + 9 && ci->Event.TouchEvent.y<= m->y + 11)
+				{
+					// full rnd
+					for (int c=0; c<4; c++)
+					{
+						// calc current interpolation for hover ch, store in prev
+						data.prev[c] = data.get_anim(c, menu_window.time, dna.w, dna.frames);
+						data.anim[c] = menu_window.time; // start new timer
+					}
+
+					data.avatar = 0;
+
+					data.avatar = (data.avatar<<8) | ( rand()%dna.frames );
+					data.avatar = (data.avatar<<8) | ( rand()%dna.frames );
+					data.avatar = (data.avatar<<8) | ( rand()%dna.frames );
+					data.avatar = (data.avatar<<8) | ( rand()%dna.frames );
+
+					conf_player.avatar=data.avatar;
+					SaveConf();
+
+					return 1;
+				}
+				else
+				{
+					int c = -1;
+
+					if (ci->Event.TouchEvent.y == m->y + 12)
+						c=0;
+					if (ci->Event.TouchEvent.y == m->y + 13)
+						c=1;
+					if (ci->Event.TouchEvent.y == m->y + 14)
+						c=2;
+					if (ci->Event.TouchEvent.y == m->y + 15 || ci->Event.TouchEvent.y == m->y + 16)
+						c=3;
+
+					if (c>=0)
+					{
+						int b = 8*c;
+
+						// calc current interpolation for hover ch, store in prev
+						data.prev[c] = data.get_anim(c, menu_window.time, dna.w, dna.frames);
+						data.anim[c] = menu_window.time; // start new timer
+
+						// update persistent destination
+						int i = ( data.avatar >> b ) & 0xFF;
+						i--;
+						if (i==-1)
+							i=dna.frames-1;
+						data.avatar &= ~(0xFF << b);
+						data.avatar |= i << b;
+
+						conf_player.avatar=data.avatar;
+						SaveConf();
+
+						return 1;
+					}
+				}
 			}
 
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
