@@ -513,8 +513,8 @@ function input_mousedown(event)
 		var id = 0;
 
 		// convert x,y from client space pixels to canvas space glyphs
-		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+		x = Math.floor( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.floor( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
 
 		mouse_x = x;
 		mouse_y = y;
@@ -537,8 +537,8 @@ function input_mousemove(event)
 		var id = 0;
 
 		// convert x,y from client space pixels to canvas space glyphs
-		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+		x = Math.floor( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.floor( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
 
 		if (x != mouse_x || y != mouse_y)
 		{
@@ -562,8 +562,8 @@ function input_mouseup(event)
 		var id = 0;
 
 		// convert x,y from client space pixels to canvas space glyphs
-		x = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
-		y = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
+		x = Math.floor( (x - touch_rect_x) * touch_rect_u / touch_rect_w );
+		y = Math.floor( (y - touch_rect_y) * touch_rect_v / touch_rect_h );
 
 		set_touch(0x10000002, x,y,id);
 
@@ -609,14 +609,14 @@ function input_touchstart(event)
 			x = (x - touch_rect_x) * touch_rect_u / touch_rect_w;
 			y = (y - touch_rect_y) * touch_rect_v / touch_rect_h;
 
-			var qx = Math.round(x);
-			var qy = Math.round(y);
+			var qx = Math.floor(x);
+			var qy = Math.floor(y);
 
-			touches[key] = { 'x':qx, 'y':qy, 'id':id, 'fx':x-qx, 'fy':y-qy };
+			touches[key] = { 'x':qx, 'y':qy, 'id':id, 'fx':qx+0.5-x, 'fy':qy+0.5-y };
 
-			set_touch(0x10000000,x,y,id);
+			set_touch(0x10000000,qx,qy,id);
 
-			console.log("BEGIN " + x + "," + y + "," + id + " ("+key+")");
+			console.log("BEGIN " + qx + "," + qy + "," + id + " ("+key+")");
 		}
 	}
 }
@@ -641,10 +641,10 @@ function input_touchmove(event)
 			var id = t.id;
 
 			// convert x,y from client space pixels to canvas space glyphs
-			var qx = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w - t.fx);
-			var qy = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h - t.fy);
+			var qx = Math.floor( (x - touch_rect_x) * touch_rect_u / touch_rect_w + t.fx);
+			var qy = Math.floor( (y - touch_rect_y) * touch_rect_v / touch_rect_h + t.fy);
 
-			if (x!= t.x || y!= t.y)
+			if (qx!= t.x || qy!= t.y)
 			{
 				t.x = qx;
 				t.y = qy;
@@ -676,8 +676,8 @@ function input_touchendcancel(event)
 			var id = t.id;
 
 			// convert x,y from client space pixels to canvas space glyphs
-			var qx = Math.round( (x - touch_rect_x) * touch_rect_u / touch_rect_w - t.fx);
-			var qy = Math.round( (y - touch_rect_y) * touch_rect_v / touch_rect_h - t.fy);
+			var qx = Math.floor( (x - touch_rect_x) * touch_rect_u / touch_rect_w + t.fx);
+			var qy = Math.floor( (y - touch_rect_y) * touch_rect_v / touch_rect_h + t.fy);
 
 			set_touch(0x10000002, qx,qy,id);
 			touches[key] = null;
@@ -741,7 +741,7 @@ function SetInputHandlers(elem)
 	elem.addEventListener('touchend', input_touchendcancel, { passive: false });
 	elem.addEventListener('touchcancel', input_touchendcancel, { passive: false });
 
-	elem.addEventListener('click', function(ev) { alert(); }, { passive: false });
+	//elem.addEventListener('click', function(ev) { alert(); }, { passive: false });
 	elem.addEventListener('mousedown', input_mousedown, { passive: false });
 	elem.addEventListener('mousemove', input_mousemove, { passive: false });
 	elem.addEventListener('mouseup', input_mouseup, { passive: false });

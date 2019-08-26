@@ -836,13 +836,13 @@ int PromptProc(int msg, void* p1, void* p2)
 
 	const static Key keymap[] = 
 	{
+		{ L_SHIFT,L_SHIFT, false, 2,17, 11,3 },  // [0] - so no lookup needed
+		{ R_SHIFT,R_SHIFT, false, 64,17, 11,3 }, // [1] - so no lookup needed
 		{ EXIT,EXIT,       false, 72,1, 3,3 },
 		{ BKSPC,BKSPC,     false, 67,5, 8,3 },
 	//	{ TAB,TAB,         false, 2,9, 7,3 },
 		{ CAPSLK,CAPSLK,   false, 2,13, 9,3 },
 		{ ENTER,ENTER,     false, 67,13, 8,3 },
-		{ L_SHIFT,L_SHIFT, false, 2,17, 11,3 },
-		{ R_SHIFT,R_SHIFT, false, 64,17, 11,3 },
 	//	{ L_CTRL,L_CTRL,   false, 2,21, 7,3 },
 	//	{ L_WIN,L_WIN,     false, 10,21, 5,3 },
 	//	{ L_ALT,L_ALT,     false, 16,21, 5,3 },
@@ -916,8 +916,8 @@ int PromptProc(int msg, void* p1, void* p2)
 
 		int capslk_key;
 
-		bool left_shift;
-		bool right_shift;
+		int left_shift;
+		int right_shift;
 
 		int last_key_idx;
 		unsigned long last_key_blink;
@@ -959,8 +959,8 @@ int PromptProc(int msg, void* p1, void* p2)
 			data.sy = -prompt.h; // outa screen
 
 			data.capslk_key = -1;
-			data.left_shift = false;
-			data.right_shift = false;
+			data.left_shift = -1;
+			data.right_shift = -1;
 			data.last_key_idx = -1;
 			data.last_key_blink = 0;
 
@@ -980,6 +980,20 @@ int PromptProc(int msg, void* p1, void* p2)
 			if (data.capslk_key >=0)
 			{
 				int key = data.capslk_key;
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
+			}
+
+			if (data.left_shift >=0)
+			{
+				int key = 0;
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
+			}
+
+			if (data.right_shift >=0)
+			{
+				int key = 1;
 				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
 							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
 			}
@@ -1073,6 +1087,9 @@ int PromptProc(int msg, void* p1, void* p2)
 
 				if (ch==8)
 					ch = BKSPC;
+				else
+				if (ch<32 || ch>=127)
+					break;
 
 				while (keymap[key].ch)
 				{
@@ -1103,14 +1120,19 @@ int PromptProc(int msg, void* p1, void* p2)
 					key++;
 				}
 			}
+			if (ci->EventType == CON_INPUT_TCH_END)
+			{
+				if (data.left_shift == ci->Event.TouchEvent.id)
+					data.left_shift = -1;
+				if (data.right_shift == ci->Event.TouchEvent.id)
+					data.right_shift = -1;
+				break;
+			}
 			if (ci->EventType == CON_INPUT_TCH_BEGIN)
 			{
 				int key = 0;
 				int x = ci->Event.TouchEvent.x - data.sx;
 				int y = ci->Event.TouchEvent.y - data.sy;
-
-				// handle shift holds
-				// !!!
 
 				while (keymap[key].ch)
 				{
@@ -1120,6 +1142,16 @@ int PromptProc(int msg, void* p1, void* p2)
 						// check for special keys
 						switch (keymap[key].ch)
 						{
+							case L_SHIFT:
+								if (data.left_shift < 0)
+									data.left_shift = ci->Event.TouchEvent.id;
+								break;
+
+							case R_SHIFT:
+								if (data.right_shift < 0)
+									data.right_shift = ci->Event.TouchEvent.id;
+								break;
+
 							case CAPSLK:
 								if (data.capslk_key>=0)
 									data.capslk_key = -1;
@@ -1155,7 +1187,7 @@ int PromptProc(int msg, void* p1, void* p2)
 								if (data.len<16)
 								{
 									bool shift = data.capslk_key>=0 && keymap[key].caps;
-									if (data.left_shift || data.right_shift)
+									if (data.left_shift>=0 || data.right_shift>=0)
 										shift = !shift;
 
 									int c = shift ? keymap[key].shift_ch : keymap[key].ch;
@@ -2939,6 +2971,20 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 			int extra = m->state<2 ? 1:0;
 			menu_blit(s, x+16+frame.l,y-1+frame.t-1, &campagin_map, 	cur_x,cur_y, 43-frame.l-frame.r,15-frame.t-frame.b+1 +extra, 0, clip);
 
+			int clip_x1 = x+16+frame.l;
+			int clip_y1 = y-1+frame.t-1;
+			int clip_x2 = clip_x1 + (43-frame.l-frame.r) - 1;
+			int clip_y2 = clip_y1 + (15-frame.t-frame.b+1 +extra) - 1;
+
+			if (clip)
+			{
+				clip_x1 = clip_x1 < clip[0] ? clip[0] : clip_x1;
+				clip_y1 = clip_y1 < clip[1] ? clip[1] : clip_y1;
+				clip_x2 = clip_x2 > clip[0]+clip[2]-1 ? clip[0]+clip[2]-1 : clip_x2;
+				clip_y2 = clip_y2 > clip[1]+clip[3]-1 ? clip[1]+clip[3]-1 : clip_y2;
+			}
+
+
 			int lev = hold ? hold_level : (data.level<0 ? 0 : data.level);
 			int crs = hold ? hold_course : data.course; 
 
@@ -3041,6 +3087,37 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 					clip2[3]=clip[1]+clip[3]-clip2[1];
 
 				menu_blit(s,car_x,car_y,&car,0,0,6,3,car_f,clip2);
+
+				if ( m->state==2 && (menu_window.time & 0xFF) < 0x7F && // blink
+					 car_y-1 >= clip_y1 && car_y-1 <= clip_y2) // fits in clip
+				{
+					int id = hold ? data.hold_focus + 1 : 0;
+					char label[3][7]= { ">PLAY<", "RESUME", "CLEAR!" };
+					unsigned char attrib[3] = { 0x0A, 0x0E, 0x09 };
+					char* buf = s->buf + (s->w+1)*(car_y-1) + car_x;
+					if (s->color)
+					{
+						unsigned char* att = (unsigned char*)s->color + (s->w+1)*(car_y-1) + car_x;
+						for (int a=0; a<6; a++)
+						{
+							if (a+car_x >= clip_x1 && a+car_x <= clip_x2)
+							{
+								buf[a] = label[id][a];
+								att[a] = attrib[id];
+							}
+						}
+					}
+					else
+					{
+						for (int a=0; a<6; a++)
+						{
+							if (a+car_x >= clip_x1 && a+car_x <= clip_x2)
+							{
+								buf[a] = label[id][a];
+							}
+						}
+					}
+				}
 			}
 
 			data.head_t = menu_window.time;
@@ -3182,52 +3259,151 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 
 			if (ci->EventType == CON_INPUT_TCH_END)
 			{
-				/*
-					todo:
-					- if game is on hold:
-					  - if clicked on map: use hold_focus action
-					  - if clicked on 'resume' return -3
-					  - if clicked on 'reset' return 1
+				int sx = m->x + (module.l+2);
+				int sy = m->y + (module.t+1) - menu_window.smooth;
 
-					- otherwise
-					  - if clicked on map return -3 (play)
-					  - if clicked on tree, set its item focus and return 1
-
-					optionally:
-					- allow scrolling map
-				*/
-
-				// temporarily: always as click on map
-				if (hold)
+				if (ci->Event.TouchEvent.y - sy >= 0)
 				{
-					if (data.hold_focus==0)
+					if (hold)
 					{
-						// resume
-						return -3;
+						if (ci->Event.TouchEvent.x - sx > 16)
+						{
+							// apply current focus
+
+							if (data.hold_focus==0)
+							{
+								// resume
+								return -3;
+							}
+							else
+							if (data.hold_focus==1)
+							{
+								// reset
+								ClearOnHold();
+								return 1;
+							}
+						}
+						else
+						{
+							// change current focus
+							data.hold_focus = !data.hold_focus;
+						}
 					}
 					else
-					if (data.hold_focus==1)
 					{
-						// reset
-						ClearOnHold();
-						return 1;
-					}
-				}
-				else
-				{
-					int j = data.level;
-					if (j<0)
-						j=0;
+						if (ci->Event.TouchEvent.x - sx > 16)
+						{
 
-					// ensure level is not a dummy
-					if (campaign[data.course].level[j].height[0])
-					{
-						// set hold focus to resume
-						data.hold_focus = 0;
-						return -3;
-					}
+							int j = data.level;
+							if (j<0)
 
-					return 0;
+								j=0;
+
+							// ensure level is not a dummy
+							if (campaign[data.course].level[j].height[0])
+							{
+								// set hold focus to resume
+								data.hold_focus = 0;
+								return -3;
+							}
+						}
+						else
+						{
+							int y = 0; //m->y + (module.t+1) - menu_window.smooth;
+							// run like painting check for y
+							for (int i=0; i<data.map.courses; i++)
+							{
+								if (i==data.course && data.anim_y>0 || i==data.course+1 && data.anim_y<0)
+									y+=data.anim_y;
+
+								if (campaign[i].flags & 0x1)
+								{
+									// disabled?
+								}
+								else
+								{
+									if ( i!=data.course )
+									{
+										// check click on collapsed course i
+										if (y == ci->Event.TouchEvent.y - sy)
+										{
+											if (i<data.course)
+												data.anim_y = - data.map.course[data.course].levels;
+											else
+											if (i>data.course)
+												data.anim_y = data.map.course[data.course+1].levels;
+
+											data.GetXY(&data.from_x,&data.from_y);
+											data.map_bt = menu_window.time;
+											data.anim_bt = menu_window.time;
+
+											data.course = i;
+											data.level = -1;
+
+											conf_campaign.course = data.course;
+											conf_campaign.level  = data.level;
+
+											int lev = data.level<0 ? 0 : data.level;
+											data.car_to = data.map.course[data.course].level[lev].seg.from;
+
+											SaveConf();
+											return 0;
+										}
+									}
+								}
+
+								y++;
+
+								if (i==data.course || i==data.course-1 && data.anim_y>0 || i==data.course+1 && data.anim_y<0)
+								{
+									for (int j=0; j<data.map.course[data.course].levels; j++)
+									{
+										if (y<m->y+m->h-module.b - menu_window.smooth)
+										{
+											// check click on course i, unfocused level j
+											if (data.level != j && y == ci->Event.TouchEvent.y - sy)
+											{
+												if (i<data.course)
+													data.anim_y = - data.map.course[data.course].levels;
+												else
+												if (i>data.course)
+													data.anim_y = data.map.course[data.course+1].levels;
+
+												data.GetXY(&data.from_x,&data.from_y);
+												data.map_bt = menu_window.time;
+												data.anim_bt = menu_window.time;
+
+												data.course = i;
+												data.level = j;
+
+												conf_campaign.course = data.course;
+												conf_campaign.level  = data.level;
+
+												int lev = data.level<0 ? 0 : data.level;
+												data.car_to = data.map.course[data.course].level[lev].seg.from;
+
+												SaveConf();
+												return 0;
+											}
+										}
+										y++;
+									}
+
+									if (i!=data.course)
+										y-=data.map.course[data.course].levels;
+									else
+										y+=data.map.max_levels-data.map.course[data.course].levels;
+								}
+
+								if (i==data.course && data.anim_y>0 || i==data.course+1 && data.anim_y<0)
+									y-=data.anim_y;
+
+								y++;
+							}
+						}
+
+						return 0;
+					}
 				}
 
 				break;
