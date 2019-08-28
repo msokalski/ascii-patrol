@@ -222,10 +222,24 @@ var sfx_buf = null; // arr of audiocontext's buffers (all are mono 44100Hz)
 var sfx_vol = 0;
 var mo3_vol = 0;
 
-
 var sfx_voice_map;
 function PlaySfx(id, voice, loop, vol, pan)
 {
+	if (window.navigator.vibrate)
+	{
+		if (id==33)
+		{
+			// hack car explode event
+			navigator.vibrate(500);	
+		}
+
+		if (id>=30 && id<=32)
+		{
+			// wheel jump
+			navigator.vibrate(50);	
+		}
+	}
+
 	if (sfx_buf[id])
 	{
 		var src_node = audio_ctx.createBufferSource();

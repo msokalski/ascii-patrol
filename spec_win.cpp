@@ -1063,11 +1063,40 @@ DWORD WINAPI hiscore_proc(LPVOID p)
 	while (!end)
 	{
 		_flushall();
-		err = system(hiscore_data->buf);
 
-		// why system() modifies console mode?
-		SetConsoleMode(stdin_handle,ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT);
+		STARTUPINFOA         siStartupInfo;
+		PROCESS_INFORMATION piProcessInfo;
 
+		memset(&siStartupInfo, 0, sizeof(siStartupInfo));
+		memset(&piProcessInfo, 0, sizeof(piProcessInfo));
+
+		siStartupInfo.cb = sizeof(siStartupInfo);
+
+		if(!CreateProcessA(	NULL,
+							hiscore_data->buf,
+							NULL,
+							NULL,
+							FALSE,
+							
+							// stop removing mouse feedback from my console!
+							DETACHED_PROCESS, 
+
+							NULL,
+							NULL,
+							&siStartupInfo,
+							&piProcessInfo))
+		{
+		  // Could not start application
+			err = -1;
+		}
+		else
+		{
+			// Wait until application has terminated
+			WaitForSingleObject(piProcessInfo.hProcess, INFINITE);
+			CloseHandle(piProcessInfo.hThread);
+			CloseHandle(piProcessInfo.hProcess);
+			err = 0;
+		}
 
 		// check if we need to discard this data and re-fetch
 		EnterCriticalSection(&hiscore_cs);
@@ -1158,7 +1187,6 @@ DWORD WINAPI hiscore_proc(LPVOID p)
 		Sleep(250); // save OS from being flooded by pg-up/dn key auto-repeat
 	}
 
-
 	return err;
 }
 
@@ -1227,13 +1255,13 @@ void get_hiscore(int ofs, const char* id)
 	if (id && id[0])
 	{
 		sprintf_s(cmd,1024,
-			"curl --silent -o \"%s\" \"http://ascii-patrol.com/rank.php?rank=%d&id=%s\" 2>nul"
+			"curl --silent -o \"%s\" \"http://ascii-patrol.com/rank.php?rank=%d&id=%s\""
 			,folder,ofs+1,id);
 	}
 	else
 	{
 		sprintf_s(cmd,1024,
-			"curl --silent -o \"%s\" \"http://ascii-patrol.com/rank.php?rank=%d\" 2>nul"
+			"curl --silent -o \"%s\" \"http://ascii-patrol.com/rank.php?rank=%d\""
 			,folder,ofs+1);
 	}
 

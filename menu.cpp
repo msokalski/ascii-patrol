@@ -803,6 +803,7 @@ enum MODULE_MSG
 void PaintScroll(CON_OUTPUT* s, int x, int dy, int h, int pos, int size, int state, const int* clip);
 
 int ProfileProc(MODULE* m, int msg, void* p1, void* p2);
+int CampaignProc(MODULE* m, int msg, void* p1, void* p2);
 
 int PromptProc(int msg, void* p1, void* p2)
 {
@@ -1238,6 +1239,10 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 		int color;
 		int sticky;
 
+		int touch_id;
+		int touch_x;
+		int touch_y;
+
 		static void PaintSwt(CON_OUTPUT* s, int x, int y, int w, int fr, int val, int* clip)
 		{
 			if (w<5)
@@ -1304,13 +1309,14 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 			data.mus_vol = 16; // 0..32
 			data.sfx_vol = 16; // 0..32
 			set_gain((data.mus_vol*100+16)/32,(data.sfx_vol*100+16)/32);
-
+			data.touch_id = -1;
 			return 20;
 		}
 
 		case MM_FOCUS:
 		{
 			int f = *(int*)p1;
+			data.touch_id = -1;
 			break;
 		}
 
@@ -1388,6 +1394,129 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 		case MM_INPUT:
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			if ((ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) && 
+				data.touch_id == ci->Event.TouchEvent.id)
+			{
+				int delta = ci->Event.TouchEvent.x - data.touch_x;
+
+				switch (data.touch_y)
+				{
+					case 5: case 6:
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.mus_vol += delta;
+						if (data.mus_vol < 0)
+							data.mus_vol = 0;
+						if (data.mus_vol > 32)
+							data.mus_vol = 32;
+						set_gain((data.mus_vol*100+16)/32,-1);
+						conf_control.mus_vol = data.mus_vol;
+						SaveConf();
+						break;
+
+					case 7: case 8:
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.sfx_vol += delta;
+						if (data.sfx_vol < 0)
+							data.sfx_vol = 0;
+						if (data.sfx_vol > 32)
+							data.sfx_vol = 32;
+						set_gain((data.sfx_vol*100+16)/32,-1);
+						conf_control.sfx_vol = data.sfx_vol;
+						SaveConf();
+						break;
+				}
+
+				if (ci->EventType == CON_INPUT_TCH_END)
+				{
+					data.touch_id = -1;
+
+					int dy = ci->Event.TouchEvent.y - m->y + menu_window.smooth - data.touch_y;
+
+					if (delta <= +1 && delta >= -1 && dy <= +1 && dy >= -1 && data.touch_x - m->x < 40)
+					{
+						switch (data.touch_y)
+						{
+
+							case 9: case 10:
+								data.sticky = !data.sticky;
+								conf_control.sticky = data.sticky;
+								SaveConf();
+								break;
+
+							case 11: case 12:
+								data.color=!data.color;
+								SetColorMode(data.color?0x70:0x00);
+								conf_control.color = data.color;
+								SaveConf();
+								break;
+
+							case 15:
+								app_exit();
+								return 1;
+
+							case 17:
+								conf_campaign.course=0;
+								conf_campaign.level=-1;
+								conf_campaign.passed=0;
+								CampaignProc(0,MM_LOAD,0,0);
+								SaveConf();
+								break;
+						}
+					}
+				}
+
+				return 1;
+			}
+
+			if (ci->EventType == CON_INPUT_TCH_BEGIN && data.touch_id < 0)
+			{
+				int x = ci->Event.TouchEvent.x - m->x;
+				int y = ci->Event.TouchEvent.y - m->y + menu_window.smooth;
+
+				switch (y)
+				{
+					case 5: case 6: 
+						data.hover = 0;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+					case 7: case 8: 
+						data.hover = 1;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+					case 9: case 10: 
+						data.hover = 2;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+					case 11: case 12: 
+						data.hover = 3;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+
+					case 15: 
+						data.hover = 4;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+
+					case 17:
+						data.hover = 5;
+						data.touch_x = ci->Event.TouchEvent.x;
+						data.touch_y = y;
+						data.touch_id = ci->Event.TouchEvent.id;
+						break;
+				}
+			}
+
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
 			{
 				int delta=1;
@@ -1511,7 +1640,7 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 								conf_campaign.course=0;
 								conf_campaign.level=-1;
 								conf_campaign.passed=0;
-
+								CampaignProc(0,MM_LOAD,0,0);
 								SaveConf();
 								return 1;
 							}
@@ -1534,6 +1663,11 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 	{
 		int ofs;
 		int ofs_pending;
+		int touch_id;
+		int touch_px;
+		int touch_py;
+		int touch_tm;
+		int touch_sp;
 		char id[16];
 	};
 
@@ -1551,12 +1685,16 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 			data.ofs = 0;
 			data.ofs_pending = 0;
 			data.id[0] = 0;
+			data.touch_id = -1;
+			data.touch_py = 0;
 			return 20;
 		}
 
 		case MM_FOCUS:
 		{
 			int f = *(int*)p1;
+			data.touch_id = -1;
+			data.touch_py = 0;
 			break;
 		}
 
@@ -1688,11 +1826,145 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 			// paint scroll
 			PaintScroll(s,x+57,y+1,12,data.ofs,hiscore.tot,m->state,clip);
 
+			if (data.touch_id >=0 && data.touch_px - m->x >= m->w-4 && 
+				(menu_window.time - data.touch_tm >= 200 ||
+				 data.touch_sp && menu_window.time - data.touch_tm >= 10))
+			{
+				data.touch_tm = menu_window.time;
+				data.touch_sp = 1;
+
+				if (!hiscore_sync)
+				{	
+					// holding right margin works like pg up/dn with incrementing speed
+					data.ofs += data.touch_py + menu_window.smooth - m->y < 10 ? -11:+11;
+
+					char dbg[32];
+					sprintf(dbg,"ofs=%d\n",data.ofs);
+					DBG(dbg);
+
+					if (data.ofs < 0)
+						data.ofs = 0;
+					if (data.ofs > hiscore.tot - 12)
+						data.ofs = hiscore.tot - 12;
+
+					if (data.ofs - data.ofs_pending > 3*13 || data.ofs - data.ofs_pending < 13)
+					{
+						int ofs = data.ofs - 13;
+						if (ofs>hiscore.tot-65)
+							ofs=hiscore.tot-65;
+						if (ofs<0)
+							ofs=0;
+
+						if (ofs != data.ofs_pending)
+						{
+							data.ofs_pending = ofs;
+							get_hiscore(data.ofs_pending, hiscore.id);
+
+							sprintf(dbg,"get=%d\n",ofs);
+							DBG(dbg);
+						}
+					}
+
+					return 1;
+				}
+				else
+					data.touch_id = -1;
+			}
+
 			break;
 		}
 		case MM_INPUT:
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			if (ci->EventType == CON_INPUT_TCH_BEGIN && data.touch_id<0 && ci->Event.TouchEvent.y + menu_window.smooth >= m->y+4)
+			{
+				data.touch_id = ci->Event.TouchEvent.id;
+				data.touch_py = ci->Event.TouchEvent.y;
+				data.touch_px = ci->Event.TouchEvent.x;
+				data.touch_tm = menu_window.time; 
+				data.touch_sp = 0; // auto repeat off (will activate after 200ms)
+
+				if (data.touch_id >=0 && data.touch_px - m->x >= m->w-4)
+				{
+					if (!hiscore_sync)
+					{	
+						// holding right margin works like pg up/dn with incrementing speed
+						data.ofs += data.touch_py + menu_window.smooth - m->y < 10 ? -11:+11;
+
+						char dbg[32];
+						sprintf(dbg,"ofs=%d\n",data.ofs);
+						DBG(dbg);
+
+						if (data.ofs < 0)
+							data.ofs = 0;
+						if (data.ofs > hiscore.tot - 12)
+							data.ofs = hiscore.tot - 12;
+
+						if (data.ofs - data.ofs_pending > 3*13 || data.ofs - data.ofs_pending < 13)
+						{
+							int ofs = data.ofs - 13;
+							if (ofs>hiscore.tot-65)
+								ofs=hiscore.tot-65;
+							if (ofs<0)
+								ofs=0;
+
+							if (ofs != data.ofs_pending)
+							{
+								data.ofs_pending = ofs;
+								get_hiscore(data.ofs_pending, hiscore.id);
+
+								sprintf(dbg,"get=%d\n",ofs);
+								DBG(dbg);
+							}
+						}
+
+						return 1;
+					}
+					else
+						data.touch_id = -1;
+				}
+			}
+
+			if ( (ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) && 
+				data.touch_id == ci->Event.TouchEvent.id && data.touch_px - m->x < m->w-4 )
+			{
+				if (hiscore_sync)
+				{
+					data.touch_id = -1;
+					return 0;
+				}
+
+				data.ofs += data.touch_py - ci->Event.TouchEvent.y;
+				data.touch_py = ci->Event.TouchEvent.y;
+
+				if (data.ofs < 0)
+					data.ofs = 0;
+				if (data.ofs > hiscore.tot - 12)
+					data.ofs = hiscore.tot - 12;
+
+				if (data.ofs - data.ofs_pending > 3*13 || data.ofs - data.ofs_pending < 13)
+				{
+					int ofs = data.ofs - 13;
+					if (ofs>hiscore.tot-65)
+						ofs=hiscore.tot-65;
+					if (ofs<0)
+						ofs=0;
+
+					if (ofs != data.ofs_pending)
+					{
+						data.ofs_pending = ofs;
+						get_hiscore(data.ofs_pending, hiscore.id);
+					}
+				}
+			}
+
+			if (ci->EventType == CON_INPUT_TCH_END)
+			{
+				data.touch_id = -1;
+				return 0;
+			}
+
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
 			{
 				switch (ConfMapInput(ci->Event.KeyEvent.uChar.AsciiChar))
@@ -2207,15 +2479,20 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 
 			if (ci->EventType == CON_INPUT_TCH_BEGIN)
 			{
-				if (ci->Event.TouchEvent.y>= m->y + 4 && ci->Event.TouchEvent.y<= m->y + 6)
+				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 4 && 
+					ci->Event.TouchEvent.y + menu_window.smooth <= m->y + 6)
 				{
+					data.hover = 0;
 					PromptProc(MM_FOCUS,conf_player.name,0);
 					menu_window.prompt_active = true;
 					break;
 				}
 				else
-				if (ci->Event.TouchEvent.y>= m->y + 9 && ci->Event.TouchEvent.y<= m->y + 11)
+				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 9 && 
+					ci->Event.TouchEvent.y + menu_window.smooth <= m->y + 11)
 				{
+					data.hover = 1;
+
 					// full rnd
 					for (int c=0; c<4; c++)
 					{
@@ -2240,17 +2517,20 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 				{
 					int c = -1;
 
-					if (ci->Event.TouchEvent.y == m->y + 12)
+					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 12)
 						c=0;
-					if (ci->Event.TouchEvent.y == m->y + 13)
+					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 13)
 						c=1;
-					if (ci->Event.TouchEvent.y == m->y + 14)
+					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 14)
 						c=2;
-					if (ci->Event.TouchEvent.y == m->y + 15 || ci->Event.TouchEvent.y == m->y + 16)
+					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 15 || 
+						ci->Event.TouchEvent.y + menu_window.smooth == m->y + 16)
 						c=3;
 
 					if (c>=0)
 					{
+						data.hover = c+2;
+
 						int b = 8*c;
 
 						// calc current interpolation for hover ch, store in prev
@@ -3619,6 +3899,17 @@ int KeyboardProc(MODULE* m, int msg, void* p1, void* p2)
 		case MM_INPUT:
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
+
+			if (ci->EventType == CON_INPUT_TCH_BEGIN)
+			{
+				int y = ci->Event.TouchEvent.y - m->y + menu_window.smooth;
+
+				int h = (y - 5) >> 1;
+
+				if (h>=0 && h<6)
+					data.hover = h;
+			}
+
 			if (ci->EventType == CON_INPUT_KBD && ci->Event.KeyEvent.bKeyDown)
 			{
 				if (!data.focus)
@@ -4161,10 +4452,10 @@ int RunMenu(CON_OUTPUT* s)
 		{
 			read_input(ir,4,&irn);
 
-			int input_handled=0;
-
 			for (int i=0; i<irn; i++)
 			{
+				int input_handled=0;
+
 				if (mw->prompt_active)
 				{
 					if ( PromptProc( MM_INPUT, (void*)(ir+i), 0 ) )

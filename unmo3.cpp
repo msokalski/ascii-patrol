@@ -1293,6 +1293,7 @@ void PlaySFX(SFX sfx, void** voice, bool loop, int vol, int pan)
 	}
 	mo3_instr* instr = xm_player.song.instr_data [ xm_player.song.sfx_instr ];
 	unsigned int id = instr->sample_map[(int)sfx] >> 16;
+
 	play_sfx(id, voice, loop, vol, pan);
 }
 

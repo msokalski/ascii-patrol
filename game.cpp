@@ -4066,9 +4066,17 @@ LEVEL_MODAL::LEVEL_MODAL(SCREEN* _s, int _lives, int _start_lives, int* _score, 
 	chaisis_vert = 0; 
 
 	key_state = 0;
+
+	/*
 	tch_state = 0;
 	memset(tch_id,-1,sizeof(int)*32);
 	tch_quit.Event.TouchEvent.id = -1;
+	*/
+	speed_id = -1;
+	jump_id = -1;
+	fire_id = -1;
+	exit_id = -1;
+
 
 	vely = 0;
 	posy = -1; // grounded
@@ -4510,7 +4518,7 @@ int LEVEL_MODAL::Run()
 		
 		if ((key_state & 12) != 12 && expl<0 && speed) // (speed=0 -> intro!)
 		{
-			if (key_state & 8 || t.check_passed+1 >= t.check_points && t.check_points>1) // ACC
+			if ((key_state & 8) || t.check_passed+1 >= t.check_points && t.check_points>1) // ACC
 			{
 				speed+=(speed+75)/150;
 
@@ -4876,129 +4884,260 @@ int LEVEL_MODAL::Run()
 		//##
 		for (int i=0; i<irn; i++)
 		{
+			/*
+				TOUCH LAYOUT:
+				             draggable        tappable
+				        :    LEFT HAND    :  RIGHT HAND  : 3 :
+				     -- +-----+-----+-----+--------------+---+ -- 0
+				        |     |     |     |              | X | 3 cells
+				        | LFT |     | RGT |      JUMP    +---+ -- 
+				        |     |     |     +------------------+ -- v-half
+				     -- +-----+-----+-----+                  |
+				3 cells | L-L | DWN | L-R |      FIRE        |
+				     -- +-----+-----+-----+------------------+ -- height
+				        :     :     :     :                  :
+				        0    1/6   2/6  h-half             width
+			*/
+
 			if (ir[i].EventType==CON_INPUT_TCH_BEGIN)
 			{
-				if (ir[i].Event.TouchEvent.x >= s->w - (s->w>>3) && 
-					ir[i].Event.TouchEvent.y <= (s->h>>3))
-				{
-					if (tch_quit.Event.TouchEvent.id==-1)
-						tch_quit = ir[i];
-				}
-				else
 				if (ir[i].Event.TouchEvent.x < (s->w>>1))
 				{
-					if (ir[i].Event.TouchEvent.y < (s->h>>1))
+					if (speed_id<0)
 					{
-						if (!(key_state&1))
-						{
-							key_state |= 1;
-							tch_state |= 1;
-							tch_id[0/*(1<<0) == 1*/] = ir[i].Event.TouchEvent.id;
+						speed_id = ir[i].Event.TouchEvent.id;
 
-							if (freeze_fr<0 && posy<0) // JUMP
+						int old = key_state;
+
+						key_state &= ~0x0E;
+
+						if (ir[i].Event.TouchEvent.x < s->w*1/6)
+						{
+							// left
+							key_state |= 4;
+							if (!(old & 4))
+								Record(REC_KEY,fr,KBD_LT,1);
+						}
+						else
+						{
+							if (old & 4)
+								Record(REC_KEY,fr,KBD_LT,0);
+						}
+
+						if (ir[i].Event.TouchEvent.x >= s->w*2/6)
+						{
+							// right
+							key_state |= 8;
+							if (!(old & 8))
+								Record(REC_KEY,fr,KBD_RT,1);
+						}
+						else
+						{
+							if (old & 8)
+								Record(REC_KEY,fr,KBD_RT,0);
+						}
+
+						if (ir[i].Event.TouchEvent.y >= s->h-3)
+						{
+							// down
+							key_state |= 2;
+							if (!(old & 2))
+								Record(REC_KEY,fr,KBD_DN,1);
+						}
+						else
+						{
+							if (old & 2)
+								Record(REC_KEY,fr,KBD_DN,0);
+						}
+					}
+				}
+				else
+				{
+					if (ir[i].Event.TouchEvent.y >= (s->h>>1))
+					{
+						if (fire_id<0)
+						{
+							// fire
+							fire_id = ir[i].Event.TouchEvent.id;
+
+							if (!(key_state & 16))
 							{
-								int extra_vel = 128*speed*(wheel_vert[0]-wheel_vert[2])/(10*t_scroll_div*(wheel_pos[2]-wheel_pos[0]));
-								if (expl<0)
+								key_state |= 16;
+								Record(REC_KEY,fr,13,1);
+
+								if (freeze_fr<0 && bullets<32 && ((fr-bullet_fr)>=20 || bullet_fr<0)) // FIRE
 								{
-									vely = 80 + extra_vel;
-									posy = -256*(chaisis_vert + 6-h) + vely;
-									PlaySFX(CAR_JUMP,&jump_voice);
+									if (expl<0)
+									{
+										BULLET* b = bullet+bullets;
+										bullets++;
+										b->sx = x+4;
+										b->x = t.scroll + b->sx;
+										b->y = chaisis_vert;
+										b->fr = fr;
+										b->vx = speed;
+										bullet_fr = fr;
+
+										PlaySFX(CAR_LASER);
+									}
+								}
+
+								if (freeze_fr<0 && cannon_t<0) // FIRE
+								{
+									if (expl<0)
+									{
+										cannon_t = fr;
+										cannon_x = x + 13 - 2;
+										cannon_y = chaisis_vert+2;
+										cannon_hit = false;
+
+										PlaySFX(CAR_CANNON);
+									}
 								}
 							}
 						}
 					}
 					else
 					{
-						// dn
-						key_state |= 2;
-						tch_state |= 2;
-						tch_id[1/*(1<<1) == 2*/] = ir[i].Event.TouchEvent.id;
-					}
-				}
-				else
-				if (ir[i].Event.TouchEvent.x >= (s->w>>1))
-				{
-					if (!(key_state&16))
-					{
-						key_state |= 16;
-						tch_state |= 16;
-						tch_id[4/*(1<<4) == 16*/] = ir[i].Event.TouchEvent.id;
-
-						if (freeze_fr<0 && bullets<32 && ((fr-bullet_fr)>=20 || bullet_fr<0)) // FIRE
+						if (ir[i].Event.TouchEvent.y < 3 && ir[i].Event.TouchEvent.x >= s->w-3)
 						{
-							if (expl<0)
-							{
-								BULLET* b = bullet+bullets;
-								bullets++;
-								b->sx = x+4;
-								b->x = t.scroll + b->sx;
-								b->y = chaisis_vert;
-								b->fr = fr;
-								b->vx = speed;
-								bullet_fr = fr;
+							if (exit_id<0)
+								exit_id = ir[i].Event.TouchEvent.id;
+						}
+						else
+						if (jump_id<0)
+						{
+							// jump
+							jump_id = ir[i].Event.TouchEvent.id;
 
-								PlaySFX(CAR_LASER);
+							if (!(key_state & 1))
+							{
+								key_state |= 1;
+								Record(REC_KEY,fr,KBD_UP,1);
+
+								if (freeze_fr<0 && posy<0) // JUMP
+								{
+									int extra_vel = 128*speed*(wheel_vert[0]-wheel_vert[2])/(10*t_scroll_div*(wheel_pos[2]-wheel_pos[0]));
+									if (expl<0)
+									{
+										vely = 80 + extra_vel;
+										posy = -256*(chaisis_vert + 6-h) + vely;
+										PlaySFX(CAR_JUMP,&jump_voice);
+									}
+								}
 							}
 						}
-
-						if (freeze_fr<0 && cannon_t<0) // FIRE
-						{
-							if (expl<0)
-							{
-								cannon_t = fr;
-								cannon_x = x + 13 - 2;
-								cannon_y = chaisis_vert+2;
-								cannon_hit = false;
-
-								PlaySFX(CAR_CANNON);
-							}
-						}
-
-						Record(REC_KEY,fr,13,1); 
 					}
 				}
 			}
 			else
 			if (ir[i].EventType==CON_INPUT_TCH_MOVE)
 			{
-				if (ir[i].Event.TouchEvent.id == tch_quit.Event.TouchEvent.id)
+				DBG("------MOVE\n");
+
+				if (ir[i].Event.TouchEvent.id == speed_id)
 				{
-					if (ir[i].Event.TouchEvent.x != tch_quit.Event.TouchEvent.x ||
-						ir[i].Event.TouchEvent.y != tch_quit.Event.TouchEvent.y)
+					int old = key_state;
+					key_state &= ~0x0E;
+
+					if (ir[i].Event.TouchEvent.x < s->w*1/6)
 					{
-						tch_quit.Event.TouchEvent.id = -1;
+						// left
+						key_state |= 4;
+						if (!(old & 4))
+							Record(REC_KEY,fr,KBD_LT,1);
+					}
+					else
+					{
+						if (old & 4)
+							Record(REC_KEY,fr,KBD_LT,0);
+					}
+
+					if (ir[i].Event.TouchEvent.x >= s->w*2/6)
+					{
+						// right
+						key_state |= 8;
+						if (!(old & 8))
+							Record(REC_KEY,fr,KBD_RT,1);
+					}
+					else
+					{
+						if (old & 8)
+							Record(REC_KEY,fr,KBD_RT,0);
+					}
+
+					if (ir[i].Event.TouchEvent.y >= s->h-3)
+					{
+						// down
+						key_state |= 2;
+						if (!(old & 2))
+							Record(REC_KEY,fr,KBD_DN,1);
+					}
+					else
+					{
+						if (old & 2)
+							Record(REC_KEY,fr,KBD_DN,0);
 					}
 				}
 			}
 			else
 			if (ir[i].EventType==CON_INPUT_TCH_END)
 			{
-				if (ir[i].Event.TouchEvent.id == tch_quit.Event.TouchEvent.id)
+				DBG("------END\n");
+
+				if (ir[i].Event.TouchEvent.id == speed_id)
 				{
-					tch_quit.Event.TouchEvent.id = -1;
-					if (ir[i].Event.TouchEvent.x == tch_quit.Event.TouchEvent.x &&
-						ir[i].Event.TouchEvent.y == tch_quit.Event.TouchEvent.y)
-					{
-						return -2;
-					}
+					speed_id = -1;
+
+					if (key_state & 2)
+						Record(REC_KEY,fr,KBD_DN,0);
+					if (key_state & 4)
+						Record(REC_KEY,fr,KBD_LT,0);
+					if (key_state & 8)
+						Record(REC_KEY,fr,KBD_RT,0);
+
+					key_state &= ~0x0E;
 				}
 
-				for (int t=0; t<32; t++)
+				if (ir[i].Event.TouchEvent.id == fire_id)
 				{
-					if (ir[i].Event.TouchEvent.id == tch_id[t])
-					{
-						key_state &= ~(1<<t);
-						tch_state &= ~(1<<t);
-						tch_id[t] = -1;
+					if (key_state & 16)
+						Record(REC_KEY,fr,13,0);
+					key_state &= ~16;
+					fire_id = -1;
+				}
 
-						switch (t)
-						{
-							case 0: Record(REC_KEY,fr,KBD_UP,0); break;
-							case 1: Record(REC_KEY,fr,KBD_DN,0); break;
-							case 2: Record(REC_KEY,fr,KBD_LT,0); break;
-							case 3: Record(REC_KEY,fr,KBD_RT,0); break;
-							case 4: Record(REC_KEY,fr,13,0); break;
-						}
+				if (ir[i].Event.TouchEvent.id == jump_id)
+				{
+					if (key_state & 1)
+						Record(REC_KEY,fr,KBD_UP,0);
+					key_state &= ~1;
+					jump_id = -1;
+				}
+
+				if (ir[i].Event.TouchEvent.id == exit_id)
+				{
+					exit_id = -1;
+
+					if (ir[i].Event.TouchEvent.y < 3 && ir[i].Event.TouchEvent.x >= s->w-3)
+					{
+						if (key_state & 1)
+							Record(REC_KEY,fr,KBD_UP,0);
+						if (key_state & 2)
+							Record(REC_KEY,fr,KBD_DN,0);
+						if (key_state & 4)
+							Record(REC_KEY,fr,KBD_LT,0);
+						if (key_state & 8)
+							Record(REC_KEY,fr,KBD_RT,0);
+						if (key_state & 16)
+							Record(REC_KEY,fr,13,0);
+
+						key_state = 0;
+						speed_id = -1;
+						fire_id = -1;
+						jump_id = -1;
+
+						return -2;
 					}
 				}
 			}
@@ -5010,9 +5149,15 @@ int LEVEL_MODAL::Run()
 				if (!ir[i].Event.FocusEvent.bSetFocus)
 				{
 					key_state = 0;
+					/*
 					tch_state = 0;
 					memset(tch_id,-1,sizeof(int)*32);
 					tch_quit.Event.TouchEvent.id = -1;
+					*/
+					speed_id = -1;
+					jump_id = -1;
+					fire_id = -1;
+					exit_id = -1;
 				}
 			}
 			else
@@ -5073,7 +5218,9 @@ int LEVEL_MODAL::Run()
 
 				if (key)
 				{
-					if (ir[i].Event.KeyEvent.bKeyDown && !(key_state&key) && !(tch_state&key))
+					int old = key_state;
+
+					if (ir[i].Event.KeyEvent.bKeyDown && !(key_state&key) /*&& !(tch_state&key)*/)
 					{
 						//##
 						if (!HasKeyReleases())
@@ -5085,8 +5232,11 @@ int LEVEL_MODAL::Run()
 								if (key_state&8)
 								{
 									key_state &= ~8; // release right
+									/*
 									tch_state &= ~8;
 									tch_id[3] = -1;
+									*/
+									speed_id = -1;
 								}
 								else
 								{
@@ -5105,8 +5255,11 @@ int LEVEL_MODAL::Run()
 								if (key_state&4)
 								{
 									key_state &= ~4; // release left
+									/*
 									tch_state &= ~4;
 									tch_id[2] = -1;
+									*/
+									speed_id = -1;
 								}
 								else
 								{
@@ -5137,8 +5290,11 @@ int LEVEL_MODAL::Run()
 								if (key_state&2)
 								{
 									key_state &= ~2; // release down
+									/*
 									tch_state &= ~2;
 									tch_id[1] = -1;
+									*/
+									speed_id = -1;
 								}
 								else
 								{
@@ -5264,13 +5420,15 @@ int LEVEL_MODAL::Run()
 						//##
 						// if (HasKeyReleases())
 						//##
-						{
+
 							// exec press action
 							// OutputDebugString(L"DOWN!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
-							if (HasKeyReleases())
-								key_state ^= key;
+						if (HasKeyReleases())
+							key_state ^= key;
 
+						if (!(old & key))
+						{
 							switch (key)
 							{
 								case 1:  Record(REC_KEY,fr,KBD_UP,1); break;
@@ -5279,22 +5437,23 @@ int LEVEL_MODAL::Run()
 								case 8:  Record(REC_KEY,fr,KBD_RT,1); break;
 								case 16: Record(REC_KEY,fr,13,1); break;
 							}
-
 						}
 					}
 					else
-					if (!ir[i].Event.KeyEvent.bKeyDown && (key_state&key) && !(tch_state&key))
+					if (!ir[i].Event.KeyEvent.bKeyDown && (key_state&key) /*&& !(tch_state&key)*/)
 					{
 						//##
 						// if (HasKeyReleases())
 						//##
+
+						// exec release action
+						// OutputDebugString(L"UP!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+
+						if (HasKeyReleases())
+							key_state ^= key;
+
+						if (old & key)
 						{
-							// exec release action
-							// OutputDebugString(L"UP!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
-							if (HasKeyReleases())
-								key_state ^= key;
-
 							switch (key)
 							{
 								case 1:  Record(REC_KEY,fr,KBD_UP,0); break;
@@ -5303,7 +5462,6 @@ int LEVEL_MODAL::Run()
 								case 8:  Record(REC_KEY,fr,KBD_RT,0); break;
 								case 16: Record(REC_KEY,fr,13,0); break;
 							}
-
 						}
 					}
 				}
