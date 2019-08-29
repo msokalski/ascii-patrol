@@ -1421,7 +1421,7 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 							data.sfx_vol = 0;
 						if (data.sfx_vol > 32)
 							data.sfx_vol = 32;
-						set_gain((data.sfx_vol*100+16)/32,-1);
+						set_gain(-1,(data.sfx_vol*100+16)/32);
 						conf_control.sfx_vol = data.sfx_vol;
 						SaveConf();
 						break;

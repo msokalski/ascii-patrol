@@ -3,9 +3,10 @@
   <head>
     <meta charset="utf-8" />
 
-	<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="manifest" href="ascii-patrol-html5.json">
 
-	<!--
+	<meta name="viewport" content="width=800" />
+
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="HandheldFriendly" content="true" />
@@ -15,9 +16,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	-->
 
-	<link rel="manifest" href="ascii-patrol-html5.json">
 
     <title>ASCII PATROL</title>
 
@@ -75,35 +74,29 @@ Even though a license fee is not paid for the use of Freeware Version software, 
 </script>
 	
 	<style>
-	
+
+		*
+		{
+			border:0;
+			padding:0;
+			margin:0;
+		}
+			
 		canvas
 		{
 			position: absolute;
+			display: block;
+			overflow:hidden;
 		}
 		
 		html, body
 		{
 			width:100%;
 			height:100%;
-			border:0;
-			padding:0;
-			margin:0;
 			background-color:#000;
 			overflow:hidden;
 		}
 		
-		#navi
-		{
-			font-family: monospace;
-			z-index:10; 
-			position:absolute; 
-			bottom:0px; 
-			left:0px; 
-			width:100%; 
-			color:#fff;
-			background-color:rgba(0,0,0,0.5);	
-			transition: opacity 3s;
-		}
 	</style>
 
 <script id="vs" type="x-shader/x-vertex">
@@ -460,14 +453,6 @@ function init_audio()
 	}
 }
   
-
-
-function fade_navi()
-{
-	var e = document.getElementById("navi");
-	e.style.opacity = "0";
-}
-
 function toggleFullScreen() 
 {
   if (!document.fullscreenElement &&    // alternative standard method
@@ -897,7 +882,7 @@ function init2d(c)
 	window.onresize = resize;
 	resize(null);	
 	
-	document.getElementById("msg").innerHTML = "RENDERING: Canvas-2D";
+	//document.getElementById("msg").innerHTML = "RENDERING: Canvas-2D";
 	
 	requestAnimationFrame(animate);
 }
@@ -982,7 +967,7 @@ function init()
 	window.onresize = resize;
 	resize(null);	
 	
-	document.getElementById("msg").innerHTML = "RENDERING: Canvas-WebGL";
+	// document.getElementById("msg").innerHTML = "RENDERING: Canvas-WebGL";
 	
 	requestAnimationFrame(animate);
 }
@@ -1131,21 +1116,17 @@ function post_hiscore(uri)
 </head>
 
   <body>
-  
-  
-	<!--div id="navi">
-	<center>
-		<br>Press Alt+Enter for full screen impression, don't hesitate to try responsivity on scaling!<br>
-		<hr>
-		<span id="msg"></span>
-	</center>
-	</div-->
-  
+ 
 	<canvas id='ascii' width="720" height="392"></canvas>
 
     <script type='text/javascript'>
 
     	var init_api = function () {
+
+    		// todo:
+    		// here show/create some prompt to click
+    		// set click handler to it doing all the following stuff
+			// (instead of doing in in init_api)
 
     		SetInputHandlers(window);
 
@@ -1168,7 +1149,7 @@ function post_hiscore(uri)
     		if (set_audio && get_audio)
     			init_audio();
 
-    		setTimeout(fade_navi, 2000/*12000*/);
+    		// setTimeout(fade_navi, 2000/*12000*/);
     	};
 
 	var Module = {
