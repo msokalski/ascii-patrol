@@ -10,11 +10,19 @@ Currently game can be built for
 - DOS (Watcom) 
 - HTML5 browsers (Emscripten)
 
+## Version 1.5
+- Mobile browsers can use touch input
+  More on how to navigate & play using touch input is here:
+  https://ascii-patrol.com/forum/index.php?topic=71.0
+- It is possible to install game as PWA from:
+  https://ascii-patrol.com/area53/ascii-patrol-html5.html
+- You can also nottice some vibrations
+
 To use / modify / add graphics asserts located in 'asset' directory you need to use [REXPaint](http://gridsagegames.com/rexpaint)
 Copy 'assets' directory to REXPaint's 'images' subdirectory. To apply modifications to the game, in next step you should use
 temp_xp program which converts all .xp files located in some directory to assets.cpp and assets.h files being compiled with game. 
 
-[Ascii Patrol Home Page (ascii-patrol.com)](http://ascii-patrol.com)
+[Ascii Patrol Home Page (ascii-patrol.com)](https://ascii-patrol.com)
 
 Accordingly to [raspberrypi.org](https://www.raspberrypi.org/forums/viewtopic.php?f=78&t=188406)
 AP can be easily built and runs great on Raspberry PI!
@@ -22,7 +30,7 @@ AP can be easily built and runs great on Raspberry PI!
 Find me on Twitter: @MrGumix
 
 ## Give it a try on any HTML5 browser
-- http://ascii-patrol.com/area51/ascii-patrol-html5.html
+- https://ascii-patrol.com/area53/ascii-patrol-html5.html
 
 ## Quick install on Linux with *snap*
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/ascii-patrol)<br/>
