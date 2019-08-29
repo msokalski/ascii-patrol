@@ -11,10 +11,10 @@ Currently game can be built for
 - HTML5 browsers (Emscripten)
 
 ## Version 1.5
-- Mobile browsers can use touch input
-  More on how to navigate & play using touch input is here:
+- Mobile browsers can use touch input  
+  More on how to navigate & play using touch input is here:  
   https://ascii-patrol.com/forum/index.php?topic=71.0
-- It is possible to install game as PWA from:
+- It is possible to install game as PWA from:  
   https://ascii-patrol.com/area53/ascii-patrol-html5.html
 - You can also nottice some vibrations
 
