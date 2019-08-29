@@ -16,7 +16,7 @@ Currently game can be built for
   https://ascii-patrol.com/forum/index.php?topic=71.0
 - It is possible to install game as PWA from:  
   https://ascii-patrol.com/area53/ascii-patrol-html5.html
-- You can also nottice some vibrations
+- You may also notice some vibrations bzzzz....
 
 To use / modify / add graphics asserts located in 'asset' directory you need to use [REXPaint](http://gridsagegames.com/rexpaint)
 Copy 'assets' directory to REXPaint's 'images' subdirectory. To apply modifications to the game, in next step you should use
