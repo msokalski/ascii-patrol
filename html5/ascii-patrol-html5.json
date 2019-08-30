@@ -10,5 +10,7 @@
   ],
   "start_url": "ascii-patrol-html5.html",
   "display": "fullscreen",
-  "orientation": "landscape"
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#000000"
 }
