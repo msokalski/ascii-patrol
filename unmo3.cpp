@@ -415,6 +415,7 @@ struct XMChannel
 	mo3_sample* sample;
 	float frq;
 	int key;
+	int period;
 	int vol;
 	int pan;
 	int ofs;
@@ -431,7 +432,12 @@ struct XMChannel
 	// tick effects
 	int vol_slide;
 	int tone_porta;
+	int slide;
+	int porta_target;
 	int vibrato;
+	int vibrato_memory;
+	int porta_memory;
+	int vibpos;
 
 	int Smp(float t); // <- should be optimized by storing some extra context (prev sample pos?) so no % is in use
 	void Evl();
@@ -610,7 +616,7 @@ void XMPlayer::Load()
 	cmd_sync = -1;
 
 	loop_a = 0;
-	loop_b = 21;
+	loop_b = 28;
 
 	song_seq = 23; // 0
 
@@ -721,7 +727,33 @@ void XMPlayer::Tck()
 	for (int c=0; c<song.nfo->channels; c++)
 	{
 		// apply tck fx
-		chn[c].vol += chn[c].vol_slide;
+		if (tick) {
+			chn[c].vol += chn[c].vol_slide;
+			if (chn[c].sample) {
+				if (chn[c].tone_porta) {
+					int i = chn[c].tone_porta;
+					while (i--) {
+						int diff = chn[c].porta_target-chn[c].period;
+						if (!diff)
+							break;
+						chn[c].period += diff > 0 ?1:-1;
+					}
+				}
+				if (chn[c].slide) {
+					chn[c].period += chn[c].slide;
+				}
+			}
+		}
+		if (chn[c].sample) {
+			float vib = 0;
+			if (chn[c].vibrato) {
+				if (chn[c].vibrato) {
+					chn[c].vibpos += chn[c].vibrato & 0xf0;
+					vib = sin(6.28 * chn[c].vibpos/1024.0) * (chn[c].vibrato & 0xf);
+				}
+			}
+			chn[c].frq = 8363.0f * powf( 2.0f, (chn[c].period/16.0 - 48 + (chn[c].sample->transpose + ((int)chn[c].sample->finetune-128)/128.0f) + vib/16.0 ) / 12.0f );
+		}
 		if (chn[c].vol<0)
 			chn[c].vol=0;
 		if (chn[c].vol>64)
@@ -741,6 +773,7 @@ void XMPlayer::Row()
 	{
 		chn[c].vol_slide = 0;
 		chn[c].tone_porta = 0;
+		chn[c].slide = 0;
 		chn[c].vibrato = 0;
 	}
 
@@ -815,13 +848,27 @@ const static char* notes[12]=
 
 void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 {
-	unsigned char* ptr = data;
+	unsigned char* ptr;
 
 	char dbg[32]="--- -- -- - -- | ";
 
-	bool has_instr = false;
+	bool has_instr = false, porta = false;
+	int p;
 
-	for (int p=0; p<pairs; p++)
+	for (p=0, ptr=data; p<pairs; p++,ptr+=2)
+	{
+		switch ((Mo3CmdType)ptr[0])
+		{
+			case tone_portamento:
+			case vol_slide_tone_porta:
+			{
+				porta = true;
+				break;
+			}
+		}
+	}
+
+	for (p=0, ptr=data; p<pairs; p++,ptr+=2)
 	{
 		switch ((Mo3CmdType)ptr[0])
 		{
@@ -835,46 +882,44 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 					dbg[1]='X';
 					dbg[2]='X';				
 				}
-				else
-				if (key==0xfe)
+				else if (key==0xfe)
 				{
 					dbg[0]='^';
 					dbg[1]='^';
 					dbg[2]='^';				
 				}
-				else
+				else if (chn[c].sample && !porta)
 				{
-					if (chn[c].sample)
-					{
-						// if prev note is still alive
-						// we should move its context to nano-fadeout 
-						// current params with upto 1-tick fade during mixing
+					// if prev note is still alive
+					// we should move its context to nano-fadeout 
+					// current params with upto 1-tick fade during mixing
 
-						int fade_ch = c+song.nfo->channels;
-						chn[fade_ch] = chn[c];
+					int fade_ch = c+song.nfo->channels;
+					chn[fade_ch] = chn[c];
 
-						// here we store fade progress in output samples
-						chn[fade_ch].vol_slide = 0; 
+					// here we store fade progress in output samples
+					chn[fade_ch].vol_slide = 0; 
 
-						// clear others
-						chn[fade_ch].tone_porta=0;
-						chn[fade_ch].vibrato=0;
-					}
-
-					chn[c].key = key;
-
-					int o = key/12;
-					int n = key-12*o;
-
-					dbg[0]=notes[n][0];
-					dbg[1]=notes[n][1];
-					dbg[2]='1'+o;
-
-					dbg[6]='v';
-					dbg[7]='0'+chn[c].vol/10;
-					dbg[8]='0'+chn[c].vol%10;
-
+					// clear others
+					chn[fade_ch].tone_porta=0;
+					chn[fade_ch].vibrato=0;
 				}
+				if (porta) {
+					chn[c].porta_target = key*16;
+				} else {
+					chn[c].key = key;
+					chn[c].period = key*16;
+				}
+				int o = key/12;
+				int n = key-12*o;
+
+				dbg[0]=notes[n][0];
+				dbg[1]=notes[n][1];
+				dbg[2]='1'+o;
+
+				dbg[6]='v';
+				dbg[7]='0'+chn[c].vol/10;
+				dbg[8]='0'+chn[c].vol%10;
 
 				break;
 			}
@@ -882,7 +927,6 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 			case instr:
 			{
 				has_instr = true;
-
 				int i = ptr[1];
 
 				dbg[4]='0'+(i+1)/10;
@@ -894,8 +938,9 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 				chn[c].vol = chn[c].sample->volume;
 				chn[c].pan = chn[c].sample->panning;
 				chn[c].ofs = 0;
+				chn[c].vibpos = 0;
 
-				chn[c].frq = 8363.0f * powf( 2.0f, (chn[c].key - 48 + (chn[c].sample->transpose + ((int)chn[c].sample->finetune-128)/128.0f) ) / 12.0f );
+				//chn[c].frq = 8363.0f * powf( 2.0f, (chn[c].period/16.0 - 48 + (chn[c].sample->transpose + ((int)chn[c].sample->finetune-128)/128.0f) ) / 12.0f );
 
 				chn[c].vol0 = chn[c].vol;
 				chn[c].pan0 = chn[c].pan;
@@ -974,7 +1019,7 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 
 			case tone_portamento:
 			{
-				chn[c].tone_porta = ptr[1];
+				chn[c].tone_porta = chn[c].porta_memory = ptr[1];
 
 				dbg[10]='3';
 				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
@@ -985,7 +1030,15 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 
 			case vibrato:
 			{
-				chn[c].vibrato = ptr[1];
+				if (ptr[1] & 0xf) {
+					chn[c].vibrato_memory &= 0xf0;
+					chn[c].vibrato_memory |= ptr[1] & 0xf;
+				}
+				if (ptr[1] & 0xf0) {
+					chn[c].vibrato_memory &= 0xf;
+					chn[c].vibrato_memory |= ptr[1] & 0xf0;
+				}
+				chn[c].vibrato = chn[c].vibrato_memory;
 
 				dbg[10]='4';
 				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
@@ -1002,7 +1055,7 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 				if ( !(ptr[1]&0x0F) && (ptr[1]&0xF0) )
 					chn[c].vol_slide = (ptr[1]>>4)&0x0F;
 
-				chn[c].vibrato = 0; // ??????????
+				chn[c].vibrato = chn[c].vibrato_memory;
 
 				dbg[10]='6';
 				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
@@ -1013,7 +1066,7 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 
 			case portamento_down:
 			{
-				chn[c].tone_porta -= ptr[1];
+				chn[c].slide = -ptr[1];
 
 				dbg[10]='2';
 				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
@@ -1022,16 +1075,26 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 				break;
 			}
 
+			case portamento_up:
+			{
+				chn[c].slide = ptr[1];
+
+				dbg[10]='1';
+				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
+				dbg[13]="0123456789ABCDEF" [ ptr[1]%16 ];
+
+				break;
+			}
+
 			case vol_slide_tone_porta:
 			{
-
 				if ( (ptr[1]&0x0F) && !(ptr[1]&0xF0) )
 					chn[c].vol_slide = - ptr[1];
 				else
 				if ( !(ptr[1]&0x0F) && (ptr[1]&0xF0) )
 					chn[c].vol_slide = (ptr[1]>>4)&0x0F;
 
-				chn[c].tone_porta = 0; // ??????????
+				chn[c].tone_porta = chn[c].porta_memory;
 
 				dbg[10]='5';
 				dbg[12]="0123456789ABCDEF" [ ptr[1]/16 ];
@@ -1046,8 +1109,6 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 				break;
 			}
 		}
-
-		ptr+=2;
 	}
 
 	OutputDebugStringA(dbg);
