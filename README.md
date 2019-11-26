@@ -10,6 +10,9 @@ Currently game can be built for
 - DOS (Watcom) 
 - HTML5 browsers (Emscripten)
 
+## Version 1.6
+- Thanks to XM player patch provided by @hexwab music sounds even better
+
 ## Version 1.5
 - Mobile browsers can use touch input  
   More on how to navigate & play using touch input is here:  
