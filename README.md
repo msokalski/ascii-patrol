@@ -11,7 +11,7 @@ Currently game can be built for
 - HTML5 browsers (Emscripten)
 
 ## Version 1.6
-- Thanks to XM player patch provided by @hexwab music sounds even better
+- Thanks to XM player patch provided by @hexwab music sounds even better  
   https://ascii-patrol.com/area54/ascii-patrol-html5.html
 
 ## Version 1.5
