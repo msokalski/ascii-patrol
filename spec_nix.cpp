@@ -1101,10 +1101,12 @@ const char* conf_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/asciipat.cfg", home);
+		const char* configPath = getenv("ASCII_PATROL_CONFIG_PATH");
+		if (!configPath || !configPath[0])
+			configPath = getenv("HOME");
+		if (!configPath || !configPath[0])
+			configPath = ".";
+		sprintf_s(path,1024,"%s/asciipat.cfg", configPath);
 	}
 
 	return path;
@@ -1116,10 +1118,12 @@ const char* record_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/asciipat.rec", home);
+		const char* recordPath = getenv("ASCII_PATROL_RECORD_PATH");
+		if (!recordPath || !recordPath[0])
+			recordPath = getenv("HOME");
+		if (!recordPath || !recordPath[0])
+			recordPath = ".";
+		sprintf_s(path,1024,"%s/asciipat.rec", recordPath);
 	}
 
 	return path;
@@ -1131,10 +1135,12 @@ const char* shot_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/", home);
+		const char* shotPath = getenv("ASCII_PATROL_SHOT_PATH");
+		if (!shotPath || !shotPath[0])
+			shotPath = getenv("HOME");
+		if (!shotPath || !shotPath[0])
+			shotPath = ".";
+		sprintf_s(path,1024,"%s/", shotPath);
 	}
 
 	return path;
@@ -1155,10 +1161,8 @@ void* hiscore_proc(void* p)
 	bool end = false;
 
 	static char path[1024];
-	const char* home = getenv("HOME");
-	if (!home || !home[0])
-		home=".";
-	sprintf_s(path,1024,"%s/asciipat.rnk", home);
+	const char* recordPath = record_path();
+	sprintf_s(path,1024,"%s/asciipat.rnk", recordPath);
 
 	while (!end)
 	{
@@ -1311,10 +1315,8 @@ void get_hiscore(int ofs, const char* id)
 		return;
 
 	static char path[1024];
-	const char* home = getenv("HOME");
-	if (!home || !home[0])
-		home=".";
-	sprintf_s(path,1024,"%s/asciipat.rnk", home);
+	const char* recordPath = record_path();
+	sprintf_s(path,1024,"%s/asciipat.rnk", recordPath);
 
 	char cmd[1024];
 
@@ -1337,10 +1339,8 @@ void get_hiscore(int ofs, const char* id)
 void post_hiscore()
 {
 	static char path[1024];
-	const char* home = getenv("HOME");
-	if (!home || !home[0])
-		home=".";
-	sprintf_s(path,1024,"%s/asciipat.rnk", home);
+	const char* recordPath = record_path();
+	sprintf_s(path,1024,"%s/asciipat.rnk", recordPath);
 
 	char cmd[1024];
 	sprintf_s(cmd,1024,
