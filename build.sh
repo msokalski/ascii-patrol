@@ -1,4 +1,3 @@
-#!/bin/sh
 g++ \
 	-pthread \
 	-Wno-multichar \
