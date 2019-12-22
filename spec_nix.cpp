@@ -1101,12 +1101,15 @@ const char* conf_path()
 
 	if (!path[0])
 	{
-		const char* configPath = getenv("XDG_CONFIG_HOME");
-		if (!configPath || !configPath[0])
-			configPath = getenv("HOME");
-		if (!configPath || !configPath[0])
-			configPath = ".";
-		sprintf_s(path,1024,"%s/asciipat/asciipat.cfg", configPath);
+		const char* xdg_conf_home = getenv("XDG_CONFIG_HOME");
+		const char* home = getenv("HOME");
+
+		if (xdg_conf_home)
+			sprintf_s(path,1024,"%s/asciipat/asciipat.cfg", xdg_conf_home);
+		else if (home)
+			sprintf_s(path,1024,"%s/asciipat.cfg", home);
+		else
+			sprintf_s(path,1024,"./asciipat.cfg");
 	}
 
 	return path;
@@ -1118,12 +1121,15 @@ const char* record_path()
 
 	if (!path[0])
 	{
-		const char* recordPath = getenv("XDG_DATA_HOME");
-		if (!recordPath || !recordPath[0])
-			recordPath = getenv("HOME");
-		if (!recordPath || !recordPath[0])
-			recordPath = ".";
-		sprintf_s(path,1024,"%s/asciipat/asciipat.rec", recordPath);
+		const char* xdg_data_home = getenv("XDG_DATA_HOME");
+		const char* home = getenv("HOME");
+
+		if (xdg_data_home)
+			sprintf_s(path,1024,"%s/asciipat/asciipat.rec", xdg_data_home);
+		else if (home)
+			sprintf_s(path,1024,"%s/asciipat.rec", home);
+		else
+			sprintf_s(path,1024,"./asciipat.rec");
 	}
 
 	return path;
@@ -1135,12 +1141,15 @@ const char* shot_path()
 
 	if (!path[0])
 	{
-		const char* shotPath = getenv("XDG_DATA_HOME");
-		if (!shotPath || !shotPath[0])
-			shotPath = getenv("HOME");
-		if (!shotPath || !shotPath[0])
-			shotPath = ".";
-		sprintf_s(path,1024,"%s/asciipat", shotPath);
+		const char* xdg_data_home = getenv("XDG_DATA_HOME");
+		const char* home = getenv("HOME");
+
+		if (xdg_data_home)
+			sprintf_s(path,1024,"%s/asciipat", xdg_data_home);
+		else if (home)
+			sprintf_s(path,1024,"%s", home);
+		else
+			sprintf_s(path,1024,".");
 	}
 
 	return path;
