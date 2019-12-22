@@ -81,6 +81,16 @@ or
 
 More on asciipat arguments can be found here: http://ascii-patrol.com/forum/index.php?topic=63
 
+## Filepaths
+Ascii Patrol creates two files: _asciipat.cfg_ and _asciipat.rec_.
+
+_asciipat.cfg_ is created when you change your player name, avatar, or key bindings.
+_asciipat.rec_ is created when you start playing the game, and get a score.
+
+On Linux, by default, the game saves these files in $HOME. If $HOME is not set, then the game saves the files in the current directory.
+
+However, if $ASCII_PATROL_CONFIG_DIR or $ASCII_PATROL_RECORD_DIR are set, then the game will save the files in those directories respectively. The directories should already exist; Ascii Patrol will not create them.
+
 ## Problems?
 - no sound? -> install / start pulseaudio
 - weird colors? -> try another terminal emulator or run from raw console (ctrl-alt-F1 or so)
