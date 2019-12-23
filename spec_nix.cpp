@@ -1101,10 +1101,12 @@ const char* conf_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/asciipat.cfg", home);
+		const char* dir = getenv("ASCII_PATROL_CONFIG_DIR");
+		if (!dir || !dir[0])
+			dir = getenv("HOME");
+		if (!dir || !dir[0])
+			dir = ".";
+		sprintf_s(path,1024,"%s/asciipat.cfg", dir);
 	}
 
 	return path;
@@ -1116,10 +1118,12 @@ const char* record_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/asciipat.rec", home);
+		const char* dir = getenv("ASCII_PATROL_RECORD_DIR");
+		if (!dir || !dir[0])
+			dir = getenv("HOME");
+		if (!dir || !dir[0])
+			dir=".";
+		sprintf_s(path,1024,"%s/asciipat.rec", dir);
 	}
 
 	return path;
@@ -1131,10 +1135,12 @@ const char* shot_path()
 
 	if (!path[0])
 	{
-		const char* home = getenv("HOME");
-		if (!home || !home[0])
-			home=".";
-		sprintf_s(path,1024,"%s/", home);
+		const char* dir = getenv("ASCII_PATROL_SHOT_DIR");
+		if (!dir || !dir[0])
+			dir = getenv("HOME");
+		if (!dir || !dir[0])
+			dir=".";
+		sprintf_s(path,1024,"%s/", dir);
 	}
 
 	return path;
