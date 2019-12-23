@@ -10,6 +10,9 @@ Currently game can be built for
 - DOS (Watcom) 
 - HTML5 browsers (Emscripten)
 
+## Version 1.7
+- Added $ASCII_PATROL_CONFIG_DIR and $ASCII_PATROL_RECORD_DIR environment variables (Linux only)
+
 ## Version 1.6
 - Thanks to XM player patch provided by @hexwab music sounds even better  
   https://ascii-patrol.com/area54/ascii-patrol-html5.html
