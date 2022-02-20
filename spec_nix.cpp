@@ -692,7 +692,7 @@ static int ansi_set_color_ex(int fg, int bg)
 	    return printf("\x1B[38;5;%d;48;5;%dm",fg%256,bg%256);
 
 	// bold & blink
-	return printf("\x1B[%d;%d;%s;%sm",fg%8+30,bg%8+40,fg<8?"21":"1",bg<8?"25":"5");
+	return printf("\x1B[%d;%d;%s;%sm",fg%8+30,bg%8+40,fg<8?"22":"1",bg<8?"25":"5");
 }
 
 static int ansi_set_color_rgb(int fg, int bg)
