@@ -78,9 +78,13 @@ The needed libraries are installed like:
 ```sh
 # install required packages, (no apt-get -> use pacman)
 sudo apt-get install libx11-dev libpulse-dev
+# OR
+sudo dnf install libX11-devel pulseaudio-libs-devel
 
 # to fix problems with no keyboard input in few gnome terminals we require XI2
 sudo apt-get install libxi-dev
+# OR
+sudo dnf install libXi-devel
 ```
 
 Build with CMake:
@@ -121,6 +125,15 @@ Works with Visual Studio, MinGW / MSYS2, Cygwin, or WSL.
 
 ```sh
 cmake -Bbuild
+cmake --build build
+```
+
+### HTML5
+
+On a system with emscripten installed, build for HTML5 web browsers, producing "build/asciipat.[js,wasm]"
+
+```sh
+emcmake cmake -B build -Dweb=on
 cmake --build build
 ```
 
