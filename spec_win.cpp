@@ -2,6 +2,7 @@
 
 #ifdef WIN
 
+#include <algorithm>
 #include <windows.h>
 #include <Shlobj.h>
 #include <crtdbg.h>
@@ -98,14 +99,14 @@ DWORD WINAPI SoundProc(LPVOID p)
 	}
 
 	long vol = InterlockedExchange(&mo3_gain,-1);
-		
+
 	if (vol>=0)
 	{
 		DWORD db;
 
 		if(vol <= 0)
 			db = -10000;
-		else 
+		else
 		if(vol >= 100)
 			db = 0;
 		else
@@ -138,14 +139,14 @@ DWORD WINAPI SoundProc(LPVOID p)
 		idsb->GetCurrentPosition(&play_pos,&write_pos);
 
 		long vol = InterlockedExchange(&mo3_gain,-1);
-		
+
 		if (vol>=0)
 		{
 			DWORD db;
 
 			if(vol <= 0)
 			  db = -10000;
-			else 
+			else
 			if(vol >= 100)
 			  db = 0;
 			else
@@ -277,7 +278,7 @@ static CRITICAL_SECTION sfx_cs;
 static UINT sfx_timer=0;
 static int sfx_gain = 100;
 
-//SFXFader 
+//SFXFader
 
 void CALLBACK SFXFader(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2)
 {
@@ -309,7 +310,7 @@ void CALLBACK SFXFader(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1
 
 			if(gain <= 0)
 			  db = -10000;
-			else 
+			else
 			if(gain >= 1.0f)
 			  db = 0;
 			else
@@ -369,7 +370,7 @@ bool play_sfx(unsigned int id, void** voice, bool loop, int vol, int pan)
 			v->id = id;
 			v->voice = dup;
 			v->next = sfx_voice;
-			
+
 			v->vol  = sfx_gain;
 			v->gain = vol;
 			v->pan  = 0;
@@ -379,7 +380,7 @@ bool play_sfx(unsigned int id, void** voice, bool loop, int vol, int pan)
 
 			if(gain <= 0)
 			  db = -10000;
-			else 
+			else
 			if(gain >= 1.0f)
 			  db = 0;
 			else
@@ -566,7 +567,7 @@ bool set_sfx_params(void* voice, int vol, int pan)
 
 			if(gain <= 0)
 			  db = -10000;
-			else 
+			else
 			if(gain >= 1.0f)
 			  db = 0;
 			else
@@ -694,7 +695,7 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 	int i=0;
 	while (rem)
 	{
-		int s = (DWORD)min(rem,256);
+		int s = (DWORD)std::min(rem,256);
 		int win_r;
 		bool ok = !!ReadConsoleInputA(stdin_handle,win_ir,(DWORD)s,(DWORD*)&win_r);
 
@@ -765,12 +766,12 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r)
 							case VK_DELETE:	code=KBD_DEL; break;
 							case VK_INSERT:	code=KBD_INS; break;
 
-							case VK_HOME:	
-								code=KBD_HOM; 
+							case VK_HOME:
+								code=KBD_HOM;
 								break;
 
-							case VK_END:	
-								code=KBD_END; 
+							case VK_END:
+								code=KBD_END;
 								break;
 
 							case VK_PRIOR:	code=KBD_PUP; break;
@@ -825,20 +826,20 @@ void get_terminal_wh(int* dw, int* dh)
 }
 
 static void SetConsolePalette(HANDLE sb, const void* palette)
-{ 
+{
 	HMODULE mod = GetModuleHandleA("kernel32.dll");
 	if (!mod)
 		return;
 
 	typedef BOOL (WINAPI *PGetConsoleScreenBufferInfoEx)(HANDLE hConsoleOutput, PCONSOLE_SCREEN_BUFFER_INFOEX lpConsoleScreenBufferInfoEx);
 	typedef BOOL (WINAPI *PSetConsoleScreenBufferInfoEx)(HANDLE hConsoleOutput, PCONSOLE_SCREEN_BUFFER_INFOEX lpConsoleScreenBufferInfoEx);
-    
-	PGetConsoleScreenBufferInfoEx pGetConsoleScreenBufferInfoEx = 
+
+	PGetConsoleScreenBufferInfoEx pGetConsoleScreenBufferInfoEx =
 		(PGetConsoleScreenBufferInfoEx)GetProcAddress(mod, "GetConsoleScreenBufferInfoEx");
 
-	PSetConsoleScreenBufferInfoEx pSetConsoleScreenBufferInfoEx = 
+	PSetConsoleScreenBufferInfoEx pSetConsoleScreenBufferInfoEx =
 		(PSetConsoleScreenBufferInfoEx)GetProcAddress(mod, "SetConsoleScreenBufferInfoEx");
-	
+
 	if (pGetConsoleScreenBufferInfoEx && pSetConsoleScreenBufferInfoEx)
 	{
 		CONSOLE_SCREEN_BUFFER_INFOEX nfo={0};
@@ -848,7 +849,7 @@ static void SetConsolePalette(HANDLE sb, const void* palette)
 		memcpy(nfo.ColorTable,palette,sizeof(COLORREF)*16);
 		ok = pSetConsoleScreenBufferInfoEx(sb,&nfo);
 	}
-} 
+}
 
 static const unsigned char ansi_pal[16*4] =
 {
@@ -903,8 +904,8 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 	CONSOLE_CURSOR_INFO ci={100,FALSE};
 	//SetConsoleCursorInfo(stdout_handle,&ci);
 
-	int cols = max(80,sbi.srWindow.Right - sbi.srWindow.Left + 1);
-    int rows = max(25,sbi.srWindow.Bottom - sbi.srWindow.Top + 1);
+	int cols = std::max(80,sbi.srWindow.Right - sbi.srWindow.Left + 1);
+    int rows = std::max(25,sbi.srWindow.Bottom - sbi.srWindow.Top + 1);
 
 	*dw = cols;
 	*dh = rows;
@@ -1003,7 +1004,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
     int dy = sbi.srWindow.Top;
 
 	SMALL_RECT rgn = {dx,dy,dx+sw-1,dy+sh-1};
-	
+
 	//WriteConsoleOutputA(stdout_handle,arr,size,offs,&rgn);
 	WriteConsoleOutputW(stdout_handle,arr,size,offs,&rgn);
 
@@ -1077,9 +1078,9 @@ DWORD WINAPI hiscore_proc(LPVOID p)
 							NULL,
 							NULL,
 							FALSE,
-							
+
 							// stop removing mouse feedback from my console!
-							DETACHED_PROCESS, 
+							DETACHED_PROCESS,
 
 							NULL,
 							NULL,
@@ -1151,7 +1152,7 @@ DWORD WINAPI hiscore_proc(LPVOID p)
 					}
 
 					// change last cr to eof
-					tmp.buf[55 * tmp.siz -1] = 0; 
+					tmp.buf[55 * tmp.siz -1] = 0;
 				}
 
 				fclose(f);
@@ -1205,7 +1206,7 @@ void request_hiscore(const char* cmd)
 
 		InitializeCriticalSection(&hiscore_cs);
 		hiscore_queue = 1;
-		DWORD id=0; 
+		DWORD id=0;
 		hiscore_thread = CreateThread(0,0,hiscore_proc, 0,0,&id);
 	}
 	else
@@ -1225,7 +1226,7 @@ void request_hiscore(const char* cmd)
 			strcpy_s(hiscore_data[0].buf,65*55,cmd);
 
 			hiscore_queue = 1;
-			DWORD id=0; 
+			DWORD id=0;
 			hiscore_thread = CreateThread(0,0,hiscore_proc, 0,0,&id);
 		}
 		else
@@ -1379,4 +1380,3 @@ void unlock_player()
 }
 
 #endif
-
