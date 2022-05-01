@@ -36,9 +36,6 @@ endif()
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set_target_properties(asciipat PROPERTIES CXX_STANDARD 98)
-# necessary for modern compilers that default to C++11 or newer such as Clang
-
 install(TARGETS asciipat)
 
 if(web)

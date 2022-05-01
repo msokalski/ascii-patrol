@@ -362,7 +362,7 @@ void DLG::Start(const char* txt, unsigned long t)
 	if (text)
 		delete [] text;
 	text=0;
-	
+
 	done=false;
 	start = t;
 	time = t;
@@ -549,7 +549,7 @@ void DLG::Paint(SCREEN* s, int x, int y, bool blend)
 			int ic = i-(16-nl)/2;
 			if (ic>=0 && ic<nl)
 				c=name[ic];
-			s->buf[dy*(s->w+1)+dx] = c; // < name 
+			s->buf[dy*(s->w+1)+dx] = c; // < name
 			if (s->color)
 			{
 				s->color[dy*(s->w+1)+dx] = xl;
@@ -662,8 +662,8 @@ INTER_MODAL::~INTER_MODAL()
 }
 
 INTER_MODAL::INTER_MODAL(SCREEN* _s,
-						 int _lives, int _startlives, int* _score, 
-						 const char* _course_name, const LEVEL* _current_level, 
+						 int _lives, int _startlives, int* _score,
+						 const char* _course_name, const LEVEL* _current_level,
 						 int _time, int _hitval, int _hitmax) :
 
 	dlg_player(&dialog_left, 20,5, 0x3B, conf_player.name, 18,2, &avatar, conf_player.avatar, 3,2, 40,12),
@@ -690,7 +690,7 @@ INTER_MODAL::INTER_MODAL(SCREEN* _s,
 	dialog_idx=0;
 	level = _current_level;
 
-	phase = -4; 
+	phase = -4;
 	phase_t = get_time();
 
 	dlg[0] = 0;
@@ -729,7 +729,7 @@ int INTER_MODAL::Run()
 	get_terminal_wh(&dw,&dh);
 	int nw = dw;
 	int nh = dh;
-		
+
 	if (nw>160)
 		nw=160;
 	if (nw<80)
@@ -746,7 +746,7 @@ int INTER_MODAL::Run()
 		h=nh;
 	}
 
-	unsigned long t = get_time();
+	unsigned int t = get_time();
 
 	inter_pos += t-prev_t;
 	if (inter_pos>inter_gap)
@@ -801,12 +801,12 @@ int INTER_MODAL::Run()
 		int duration = 500;
 		int d = duration;
 		int d2 = duration*duration;
-		int tm[4] = 
+		int tm[4] =
 		{
-			t-phase_t-0,
-			t-phase_t-0,
-			t-phase_t-0,
-			t-phase_t-0,
+			static_cast<int>(t-phase_t)-0,
+			static_cast<int>(t-phase_t)-0,
+			static_cast<int>(t-phase_t)-0,
+			static_cast<int>(t-phase_t)-0,
 		};
 
 		int pos = t-phase_t;
@@ -983,7 +983,7 @@ int INTER_MODAL::Run()
 		int d = 200;
 		int d2 = d*d;
 
-		int wait = 0; // extra time to wait 
+		int wait = 0; // extra time to wait
 
 		int pos = t-phase_t;
 		bool done=false;
@@ -998,12 +998,12 @@ int INTER_MODAL::Run()
 		{
 			// hide bonuses & score
 			int duration = 800;
-			int tm[4] = 
+			int tm[4] =
 			{
-				t-phase_t,
-				t-phase_t-200,
-				t-phase_t-100,
-				t-phase_t-300,
+				static_cast<int>(t-phase_t),
+				static_cast<int>(t-phase_t)-200,
+				static_cast<int>(t-phase_t)-100,
+				static_cast<int>(t-phase_t)-300,
 			};
 
 			//bool done=true;
@@ -1060,8 +1060,8 @@ int INTER_MODAL::Run()
 	else
 	if (phase==2)
 	{
-		// show full dialog text, 
-		// wait for key press then: 
+		// show full dialog text,
+		// wait for key press then:
 		// - if there are more dialogs then phase=3, otherwise phase = 4
 		// paint 'press any key'
 
@@ -1130,7 +1130,7 @@ int INTER_MODAL::Run()
 		pos = pos*(dlg_player.frame.height-2)/duration;
 
 		// swap dialog frames
-		// in the middle clear text in frame going down 
+		// in the middle clear text in frame going down
 
 		y0 += pos;
 		y1 -= pos;
@@ -1275,6 +1275,3 @@ int INTER_MODAL::Run()
 
 	return 0;
 }
-
-
-
