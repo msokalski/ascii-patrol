@@ -995,7 +995,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 		}
 	}
 
-	COORD size = { sw,sh };
+	COORD size = { static_cast<short int>(sw), static_cast<short int>(sh) };
 	COORD offs = { 0,0 };
 
 	CONSOLE_SCREEN_BUFFER_INFO sbi;
@@ -1003,7 +1003,8 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
     int dx = sbi.srWindow.Left;
     int dy = sbi.srWindow.Top;
 
-	SMALL_RECT rgn = {dx,dy,dx+sw-1,dy+sh-1};
+	SMALL_RECT rgn = {static_cast<short int>(dx), static_cast<short int>(dy),
+	static_cast<short int>(dx+sw-1), static_cast<short int>(dy+sh-1)};
 
 	//WriteConsoleOutputA(stdout_handle,arr,size,offs,&rgn);
 	WriteConsoleOutputW(stdout_handle,arr,size,offs,&rgn);
