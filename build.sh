@@ -15,6 +15,7 @@ g++ \
 	menu.cpp \
 	assets.cpp \
 	spec_nix.cpp \
+	pulse_audio.cpp \
 	-L/usr/X11/lib \
 	-lX11 \
 	-lXi \

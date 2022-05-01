@@ -146,6 +146,8 @@ void app_exit();
 
 void init_sound(); // impl. by spec
 
+void free_sound();
+
 void pull_sound(int chn, int frq, short* buffer, int samples);
 void load_player();
 
