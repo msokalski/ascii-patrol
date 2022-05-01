@@ -1,6 +1,4 @@
 
-
-#ifdef DOS
 #include <dos.h>
 #include <string.h>
 #include <stdio.h>
@@ -1037,7 +1035,3 @@ bool set_sfx_params(void* voice, int vol, int pan)
 {
 	return false;
 }
-
-
-#endif
-

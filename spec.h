@@ -19,7 +19,7 @@ void terminal_loop();
 struct CON_OUTPUT
 {
 	int w,h;
-	char* buf; 
+	char* buf;
 	char* color;
 	void* arr;
 };
@@ -66,7 +66,7 @@ struct CON_INPUT
 			} uChar;
 		} KeyEvent;
 
-		struct 
+		struct
 		{
 			bool bSetFocus;
 		} FocusEvent;
@@ -137,7 +137,7 @@ void get_hiscore(int ofs, const char* id);
 
 // updates hiscore if got fresh data & returns true if nothing is pending
 // should be called on every frame, before accessing hiscore structure
-bool update_hiscore(); 
+bool update_hiscore();
 
 void app_exit();
 
@@ -145,6 +145,8 @@ void app_exit();
 // SOUND
 
 void init_sound(); // impl. by spec
+
+void free_sound();
 
 void pull_sound(int chn, int frq, short* buffer, int samples);
 void load_player();

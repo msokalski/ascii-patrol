@@ -1,7 +1,3 @@
-
-#ifdef WEB
-
-
 #include <emscripten.h>
 #include <memory.h>
 #include <stdlib.h>
@@ -632,6 +628,3 @@ bool set_sfx_params(void* voice, int vol, int pan)
 
 	return true;
 }
-
-
-#endif
