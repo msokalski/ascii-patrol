@@ -114,8 +114,12 @@ float powf(float f, float n);
 #endif
 
 #define ABS(a) ((a)<0 ? -(a):(a))
+#ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+#ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
 
 void write_fs();
 const char* conf_path();
