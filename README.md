@@ -94,6 +94,10 @@ cmake -Bbuild
 cmake --build build
 ```
 
+The executable build/asciipat is thereby created.
+
+---
+
 If the system doesn't have CMake:
 
 ```sh
@@ -118,6 +122,8 @@ cmake -Bbuild
 cmake --build build
 ```
 
+The executable build/asciipat is thereby created.
+
 ### Windows
 
 No extra libraries are needed on Windows.
@@ -128,14 +134,31 @@ cmake -Bbuild
 cmake --build build
 ```
 
+The executable build/asciipat.exe is thereby created.
+
 ### HTML5
 
-On a system with emscripten installed, build for HTML5 web browsers, producing "build/asciipat.[js,wasm]"
+On a system with emscripten installed, build for HTML5 web browsers:
 
 ```sh
 emcmake cmake -B build -Dweb=on
 cmake --build build
 ```
+
+The files build/asciipat.js, build/asciipat.wasm are thereby created.
+
+### DOS (OpenWatcom)
+
+Necessary environment variables must be set for OpenWatcom to work.
+We provide a PowerShell script [dos.ps1](./dos.ps1) for Windows to set these environment variables.
+CMake cross-compile for DOS from Windows/Linux:
+
+```sh
+cmake -Bbuild --toolchain dos.cmake
+cmake --build build
+```
+
+The executable build/asciipat.exe is thereby created.
 
 ## Running
 
