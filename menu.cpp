@@ -1,11 +1,9 @@
 // extern "C" _declspec(dllimport) void __stdcall OutputDebugStringA(const char* s);
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include <memory.h>
-#include <string.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+#include <cassert>
 
 #include "game.h"
 #include "spec.h"
@@ -17,7 +15,7 @@
 // remove!
 void DBG(const char* str);
 
-HISCORE hiscore = 
+HISCORE hiscore =
 {
 	0,0,0,"",""
 };
@@ -45,7 +43,7 @@ struct MENU_ASSET : ASSET
 			const char* brk = strchr(anim[0],'\n');
 			if (brk)
 				w = (int)(brk-anim[0]);
-			else 
+			else
 				w = (int)strlen(anim[0]);
 
 			h=1;
@@ -72,7 +70,7 @@ struct MENU_ASSET : ASSET
 	MENU_ASSET(const ASSET* a, int left, int right, int top, int bottom)
 	{
 		Init(a);
-		
+
 		l=left;
 		r=right;
 		t=top;
@@ -628,14 +626,14 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 		{
 			mw->module[i].w = mod_width;
 			mw->module[i].dy = height[col];
-			
+
 			height[col] = mw->module[i].dy + mw->module[i].h      +1; // extra spacing
 
 			mw->module[i].upper = bottom[0][col];
 
 			if (row)
 			{
-				if (col>0 && 
+				if (col>0 &&
 					bottom[0][col-1]==bottom[0][col])
 				{
 					// |*-*|
@@ -643,7 +641,7 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 					bottom[0][col]->lower2 = mw->module+i;
 				}
 				else
-				if (col<mod_cols-1 && 
+				if (col<mod_cols-1 &&
 					bottom[0][col]==bottom[0][col+1])
 				{
 					// |*-*|
@@ -720,7 +718,7 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 	mw->center_x = center_x;
 
 	// determine cols and rows
-	// assign x,y 
+	// assign x,y
 	// stretch to cutify layout if possible
 
 	mw->layout_w = s->w;
@@ -786,13 +784,13 @@ static void UpdateLayout(CON_OUTPUT* s, bool force=false)
 
 enum MODULE_MSG
 {
-	MM_INIT,  // return height if ok 
+	MM_INIT,  // return height if ok
 	MM_LOAD,  // overwrite menu data with conf
 	MM_INPUT, // p1 contains single CON_INPUT
 	MM_PAINT, // p1 contains CON_OUTPUT, p2 contains clip rect to apply, use menu_window.scroll
 
-	MM_FOCUS, 
-	// p1 is flag indicating if focus is being gained or lost, 
+	MM_FOCUS,
+	// p1 is flag indicating if focus is being gained or lost,
 	// if focus is being lost, p2 MUST be filled with Y coordinate of focused element in the module
 	// if focus is being gained p2 contains Y coordinate of previously focused element in module the focus is comming from
 };
@@ -835,7 +833,7 @@ int PromptProc(int msg, void* p1, void* p2)
 		int x,y,w,h;
 	};
 
-	const static Key keymap[] = 
+	const static Key keymap[] =
 	{
 		{ L_SHIFT,L_SHIFT, false, 2,17, 11,3 },  // [0] - so no lookup needed
 		{ R_SHIFT,R_SHIFT, false, 64,17, 11,3 }, // [1] - so no lookup needed
@@ -927,7 +925,7 @@ int PromptProc(int msg, void* p1, void* p2)
 		// ...
 	};
 
-	static PromptData data = 
+	static PromptData data =
 	{
 		0,0,
 		0,"",
@@ -981,21 +979,21 @@ int PromptProc(int msg, void* p1, void* p2)
 			if (data.capslk_key >=0)
 			{
 				int key = data.capslk_key;
-				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt,
 							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
 			}
 
 			if (data.left_shift >=0)
 			{
 				int key = 0;
-				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt,
 							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
 			}
 
 			if (data.right_shift >=0)
 			{
 				int key = 1;
-				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+				menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt,
 							keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
 			}
 
@@ -1005,7 +1003,7 @@ int PromptProc(int msg, void* p1, void* p2)
 				int dt = menu_window.time - data.last_key_blink;
 				if (dt<150)
 				{
-					menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt, 
+					menu_blit(s, data.sx + keymap[key].x-1, data.sy + keymap[key].y-1, &prompt,
 								keymap[key].x-1, keymap[key].y-1, keymap[key].w+2, keymap[key].h+1, 1, 0);
 				}
 				else
@@ -1047,7 +1045,7 @@ int PromptProc(int msg, void* p1, void* p2)
 				if (s->color)
 				{
 					unsigned char* c = (unsigned char*)s->color + (s->w+1)*y + x;
-					*c = 0xF0; //((*c&0xF)<<4) | ((*c>>4)&0xF); 
+					*c = 0xF0; //((*c&0xF)<<4) | ((*c>>4)&0xF);
 				}
 				else
 				{
@@ -1336,7 +1334,7 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 			unsigned char val_cl = VALUE_CL(m,true,true);
 			int l;
 			char val[32];
-			
+
 			lab_cl = LABEL_CL(m,hover==0,false);
 			if (m->state==2 && hover==0)
 				menu_print(s, x-2, y,  ">", cl_menu_c[m->state], 1, clip);
@@ -1395,7 +1393,7 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 		{
 			CON_INPUT* ci = (CON_INPUT*)p1;
 
-			if ((ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) && 
+			if ((ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) &&
 				data.touch_id == ci->Event.TouchEvent.id)
 			{
 				int delta = ci->Event.TouchEvent.x - data.touch_x;
@@ -1476,32 +1474,32 @@ int ControlProc(MODULE* m, int msg, void* p1, void* p2)
 
 				switch (y)
 				{
-					case 5: case 6: 
+					case 5: case 6:
 						data.hover = 0;
 						data.touch_x = ci->Event.TouchEvent.x;
 						data.touch_y = y;
 						data.touch_id = ci->Event.TouchEvent.id;
 						break;
-					case 7: case 8: 
+					case 7: case 8:
 						data.hover = 1;
 						data.touch_x = ci->Event.TouchEvent.x;
 						data.touch_y = y;
 						data.touch_id = ci->Event.TouchEvent.id;
 						break;
-					case 9: case 10: 
+					case 9: case 10:
 						data.hover = 2;
 						data.touch_x = ci->Event.TouchEvent.x;
 						data.touch_y = y;
 						data.touch_id = ci->Event.TouchEvent.id;
 						break;
-					case 11: case 12: 
+					case 11: case 12:
 						data.hover = 3;
 						data.touch_x = ci->Event.TouchEvent.x;
 						data.touch_y = y;
 						data.touch_id = ci->Event.TouchEvent.id;
 						break;
 
-					case 15: 
+					case 15:
 						data.hover = 4;
 						data.touch_x = ci->Event.TouchEvent.x;
 						data.touch_y = y;
@@ -1735,7 +1733,7 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 			int dx = 2;
 
 			unsigned char cl;
-			
+
 			cl = LABEL_CL(m,true,false);
 			const static char head[] = "  Rank   Name               Score     Date      Time  ";
 			menu_print(s,x+dx,y,head,cl,54,clip);
@@ -1819,14 +1817,14 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 
 			if (!done)
 			{
-				// animate 
+				// animate
 				// ...
 			}
 
 			// paint scroll
 			PaintScroll(s,x+57,y+1,12,data.ofs,hiscore.tot,m->state,clip);
 
-			if (data.touch_id >=0 && data.touch_px - m->x >= m->w-4 && 
+			if (data.touch_id >=0 && data.touch_px - m->x >= m->w-4 &&
 				(menu_window.time - data.touch_tm >= 200 ||
 				 data.touch_sp && menu_window.time - data.touch_tm >= 10))
 			{
@@ -1834,7 +1832,7 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 				data.touch_sp = 1;
 
 				if (!hiscore_sync)
-				{	
+				{
 					// holding right margin works like pg up/dn with incrementing speed
 					data.ofs += data.touch_py + menu_window.smooth - m->y < 10 ? -11:+11;
 
@@ -1882,13 +1880,13 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 				data.touch_id = ci->Event.TouchEvent.id;
 				data.touch_py = ci->Event.TouchEvent.y;
 				data.touch_px = ci->Event.TouchEvent.x;
-				data.touch_tm = menu_window.time; 
+				data.touch_tm = menu_window.time;
 				data.touch_sp = 0; // auto repeat off (will activate after 200ms)
 
 				if (data.touch_id >=0 && data.touch_px - m->x >= m->w-4)
 				{
 					if (!hiscore_sync)
-					{	
+					{
 						// holding right margin works like pg up/dn with incrementing speed
 						data.ofs += data.touch_py + menu_window.smooth - m->y < 10 ? -11:+11;
 
@@ -1926,7 +1924,7 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 				}
 			}
 
-			if ( (ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) && 
+			if ( (ci->EventType == CON_INPUT_TCH_MOVE || ci->EventType == CON_INPUT_TCH_END) &&
 				data.touch_id == ci->Event.TouchEvent.id && data.touch_px - m->x < m->w-4 )
 			{
 				if (hiscore_sync)
@@ -2034,7 +2032,7 @@ int ScoreProc(MODULE* m, int msg, void* p1, void* p2)
 								}
 							}
 							return 1;
-					
+
 						}
 
 						break;
@@ -2365,7 +2363,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 			char* name = data.name;
 			if (data.edit_pos>=0)
 				name = data.edit_buf;
-			
+
 			cl = VALUE_CL(m,data.hover==0,data.edit_pos>=0);
 			menu_print(s, x+8, y, name, cl, strlen(name), clip);
 
@@ -2377,7 +2375,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 					if (s->color)
 					{
 						unsigned char* c = (unsigned char*)s->color + (s->w+1)*y + x+8 + data.edit_pos;
-						*c = 0xF0; //((*c&0xF)<<4) | ((*c>>4)&0xF); 
+						*c = 0xF0; //((*c&0xF)<<4) | ((*c>>4)&0xF);
 					}
 					else
 					{
@@ -2385,7 +2383,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 						*c = '_';
 					}
 				}
-				// 
+				//
 			}
 
 			y+=2;
@@ -2479,7 +2477,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 
 			if (ci->EventType == CON_INPUT_TCH_BEGIN)
 			{
-				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 4 && 
+				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 4 &&
 					ci->Event.TouchEvent.y + menu_window.smooth <= m->y + 6)
 				{
 					data.hover = 0;
@@ -2488,7 +2486,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 					break;
 				}
 				else
-				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 9 && 
+				if (ci->Event.TouchEvent.y + menu_window.smooth >= m->y + 9 &&
 					ci->Event.TouchEvent.y + menu_window.smooth <= m->y + 11)
 				{
 					data.hover = 1;
@@ -2523,7 +2521,7 @@ int ProfileProc(MODULE* m, int msg, void* p1, void* p2)
 						c=1;
 					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 14)
 						c=2;
-					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 15 || 
+					if (ci->Event.TouchEvent.y + menu_window.smooth == m->y + 15 ||
 						ci->Event.TouchEvent.y + menu_window.smooth == m->y + 16)
 						c=3;
 
@@ -2906,7 +2904,7 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 		{
 			{
 				59,50,
-				"322222222077" "A" "660076665566667" "B" "655433" "C" "466666666670" "D" "11077666676666" "E" 
+				"322222222077" "A" "660076665566667" "B" "655433" "C" "466666666670" "D" "11077666676666" "E"
 			},
 			{
 				32,44,
@@ -2918,7 +2916,7 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 			},
 			{
 				60,35,
-				"22122234566666665422" "P" "22332222222" "Q" "32222222222222221110" "R" "7777766766666" "S" "66766666766666" "T" , 
+				"22122234566666665422" "P" "22332222222" "Q" "32222222222222221110" "R" "7777766766666" "S" "66766666766666" "T" ,
 			},
 			{
 				62,30,
@@ -2928,23 +2926,23 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 		{
 			{
 				38,20,
-				"4666007766" "A" "6654456666676" "B" "65566666660076" "C" "6010776670" "D" "11222232222" "E" 
+				"4666007766" "A" "6654456666676" "B" "65566666660076" "C" "6010776670" "D" "11222232222" "E"
 			},
 			{
 				15,11,
-				"445433222221200112" "F" "232221076667766660112222" "G" "222322222322" "H" "222334556" "I" "66554322322221" "J" 
+				"445433222221200112" "F" "232221076667766660112222" "G" "222322222322" "H" "222334556" "I" "66554322322221" "J"
 			},
 			{
 				47,15,
-				"22223345666655422" "K" "2233222222220766012" "L" "2221122" "M" "23345422212" "N" "211070123222" "O" 
+				"22223345666655422" "K" "2233222222220766012" "L" "2221122" "M" "23345422212" "N" "211070123222" "O"
 			},
 			{
 				81,17,
-				"432223322212" "P" "221070112" "Q" "222076666656566" "R" "66701222076" "S" "6666554466" "T" 
+				"432223322212" "P" "221070112" "Q" "222076666656566" "R" "66701222076" "S" "6666554466" "T"
 			},
 			{
 				80,13,
-				"66700766655666" "U" "666665666666770" "V" "1001222322221" "W" "22332221" "X" "207012222" "Y" "23344466" "Z" 
+				"66700766655666" "U" "666665666666770" "V" "1001222322221" "W" "22332221" "X" "207012222" "Y" "23344466" "Z"
 			}
 		},
 		{
@@ -3266,7 +3264,7 @@ int CampaignProc(MODULE* m, int msg, void* p1, void* p2)
 
 
 			int lev = hold ? hold_level : (data.level<0 ? 0 : data.level);
-			int crs = hold ? hold_course : data.course; 
+			int crs = hold ? hold_course : data.course;
 
 			if (/*s->color &&*/ m->state==2)
 			{
@@ -4316,7 +4314,7 @@ int RunMenu(CON_OUTPUT* s)
 		int nw = dw;
 		int nh = dh;
 
-		
+
 		if (nw>160)
 			nw=160;
 		if (nw<80)
@@ -4421,13 +4419,13 @@ int RunMenu(CON_OUTPUT* s)
 			if (mw->module[i].proc)
 				mw->module[i].proc( mw->module+i, MM_PAINT, (void*)s, (void*)clip );
 		}
-	
+
 		// then hovered one
 		PaintModule( s, mw->focus->x , mw->focus->y - mw->smooth, mw->focus->w, mw->focus->h, mw->focus->title, mw->focus->state, clip);
 		if (mw->focus->proc)
 			mw->focus->proc( mw->focus, MM_PAINT, (void*)s, (void*)clip );
 
-		PostPaint(s); // fix top client row, allows only '.' and ' ' glyphs and forces black background 
+		PostPaint(s); // fix top client row, allows only '.' and ' ' glyphs and forces black background
 
 		if (1)
 		{

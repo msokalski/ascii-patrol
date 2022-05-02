@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <pulse/pulseaudio.h>
 #include <pthread.h>
 

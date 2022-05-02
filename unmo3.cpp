@@ -4,12 +4,9 @@
 //#include <windows.h>
 #define OutputDebugStringA(a) (void)(a)
 
-#include <memory.h>
-#include <stdlib.h>
-//#include <malloc.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
 
 #include "unmo3.h"
 #include "spec.h"

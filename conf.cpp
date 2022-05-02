@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include "conf.h"
 #include "spec.h"

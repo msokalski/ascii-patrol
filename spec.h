@@ -89,7 +89,7 @@ bool spec_read_input( CON_INPUT* ir, int n, int* r);
 bool read_input( CON_INPUT* ir, int n, int* r);
 bool has_key_releases();
 
-#ifndef WIN
+#ifndef _WIN32
 
 #define sprintf_s(dst,size,...) sprintf(dst,__VA_ARGS__)
 

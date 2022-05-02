@@ -38,7 +38,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(Clang|GNU)")
   target_compile_options(asciipat PRIVATE -Wno-multichar)
 endif()
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set_target_properties(asciipat PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
 
 install(TARGETS asciipat)
 

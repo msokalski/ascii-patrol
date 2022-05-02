@@ -1,7 +1,6 @@
 
-#include <stdio.h>
-#include <memory.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstring>
 
 #include "assets.h"
 #include "spec.h"
@@ -133,7 +132,7 @@ int GAMEOVER_MODAL::Run()
 	get_terminal_wh(&dw,&dh);
 	int nw = dw;
 	int nh = dh;
-		
+
 	if (nw>160)
 		nw=160;
 	if (nw<80)
@@ -192,7 +191,7 @@ int GAMEOVER_MODAL::Run()
 		int len = sprintf_s(str,16,"%d",*score);
 
 		int cx = (s->w - (5*len-1))/2;
-		
+
 		fnt.Paint(s,cx,tx_y-wy+2,0x06,str);
 
 		cx = (s->w - 11)/2;

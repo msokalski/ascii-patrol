@@ -1,5 +1,5 @@
+#include <cstdio>
 
-#include <stdio.h>
 #include "manual.h"
 
 MANUAL::~MANUAL()
@@ -111,7 +111,7 @@ void MANUAL::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 			for (int y=2; y<man.height; y++)
 			{
 				for (int xs=bend+1; xs<bend+1+ws; xs++)
-					scr->color[dx+xs+(dy+y)*(scr->w+1)] = 
+					scr->color[dx+xs+(dy+y)*(scr->w+1)] =
 						(scr->color[dx+xs+(dy+y)*(scr->w+1)] & 0x0F) | 0x70;
 			}
 		}
@@ -120,4 +120,3 @@ void MANUAL::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 		paper[page+1]->BlendPage(scr,dx+bend-anim +1,dy,0,0,anim-1,-1);
 	}
 }
-

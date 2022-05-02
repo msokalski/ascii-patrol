@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <Shlobj.h>
 #include <crtdbg.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include <mmsystem.h>
 #include <mmreg.h>

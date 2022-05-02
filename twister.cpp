@@ -1,5 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+
 #include "twister.h"
 
 #define FREAD(buf,siz,cnt,fil) if ( fread(buf,siz,cnt,fil) != cnt ) exit(-1)
@@ -34,8 +35,8 @@ static TWISTER state[3]=
 
 void dbg_get_twister_state(unsigned int s[6])
 {
-	s[0]=state[0].x; s[1]=state[0].y; s[2]=state[0].z; 
-	s[3]=state[2].x; s[4]=state[2].y; s[5]=state[2].z; 
+	s[0]=state[0].x; s[1]=state[0].y; s[2]=state[0].z;
+	s[3]=state[2].x; s[4]=state[2].y; s[5]=state[2].z;
 }
 
 static TWISTER* twister = state;
@@ -69,7 +70,7 @@ void twister_seed(unsigned int s)
 
 	twister_rand();
 	twister_rand();
-	twister_rand(); 
+	twister_rand();
 }
 
 void crypt_ini()
@@ -80,7 +81,7 @@ void crypt_ini()
 	crc = 0xef561513;
 }
 
-void crypt_enc(int* i) 
+void crypt_enc(int* i)
 {
 	unsigned int c = crc;
 
@@ -104,7 +105,7 @@ void crypt_enc(int* i)
 	*i ^= c;
 }
 
-void crypt_dec(int* i) 
+void crypt_dec(int* i)
 {
 	unsigned int t;
 
@@ -126,7 +127,7 @@ void crypt_dec(int* i)
 	crc ^= crc << 1;
 }
 
-void crypt_enc(unsigned char* i) 
+void crypt_enc(unsigned char* i)
 {
 	unsigned int c = crc;
 
@@ -150,7 +151,7 @@ void crypt_enc(unsigned char* i)
 	*i ^= c;
 }
 
-void crypt_dec(unsigned char* i) 
+void crypt_dec(unsigned char* i)
 {
 	unsigned int t;
 
@@ -177,8 +178,8 @@ unsigned int crypt_chk()
 	return crc;
 }
 
-int twister_rand() 
-{          
+int twister_rand()
+{
 	unsigned int t;
 
 	twister->x ^= twister->x << 16;
@@ -223,7 +224,7 @@ int twister_rand()
 	  static const unsigned long MATRIX[2] = {0, 0x9908b0df};
 	  unsigned long y, i=0;
 
-	  while ( i<(DIFF-1) ) 
+	  while ( i<(DIFF-1) )
 	  {
 		UNROLL(i+PERIOD);
 		UNROLL(i+PERIOD);
@@ -231,7 +232,7 @@ int twister_rand()
 
 	  UNROLL((i+PERIOD) % SIZE);
 
-	  while ( i<(SIZE-1) ) 
+	  while ( i<(SIZE-1) )
 	  {
 		UNROLL(i-DIFF);
 		UNROLL(i-DIFF);
@@ -247,7 +248,7 @@ int twister_rand()
 	  }
 
 	  y = M32(MT[SIZE-1]) | L31(MT[0]);
-	  MT[SIZE-1] = MT[PERIOD-1] ^ (y>>1) ^ MATRIX[ODD(y)];  
+	  MT[SIZE-1] = MT[PERIOD-1] ^ (y>>1) ^ MATRIX[ODD(y)];
   }
 
   unsigned long y = MT[index];

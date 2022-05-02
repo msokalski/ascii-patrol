@@ -1,12 +1,10 @@
 // temp.cpp : Defines the entry point for the console application.
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include <memory.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cstring>
 
 #include "twister.h"
 

@@ -1,8 +1,6 @@
-#include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
 
 #include "twister.h"
 #include "game.h"
@@ -21,8 +19,8 @@ int rec_show; // 0-none, 1-fast, 2-slow
 MANUAL manual(&book,'*',cl_transp);
 
 // clean:77, cyan:76, magen:75, blue:74, !brown!:73, green:72, red:71, black:70
-static unsigned char cl_mountains = 0x76; 
-static unsigned char cl_city = 0x76; 
+static unsigned char cl_mountains = 0x76;
+static unsigned char cl_city = 0x76;
 
 // WRAP at column 57!
 
@@ -238,7 +236,7 @@ const DIALOG dlg_champion_1[]=
 	{0,0}
 };
 
-const DIALOG dlg_champion_2[]= 
+const DIALOG dlg_champion_2[]=
 {
 	{
 		'C',
@@ -330,7 +328,7 @@ const DIALOG dlg_champion_3[]=
 	{0,0}
 };
 
-const DIALOG dlg_champion_4[]= 
+const DIALOG dlg_champion_4[]=
 {
 	{
 		'C',
@@ -361,7 +359,7 @@ const LEVEL tutorial[] =
 		65440,
 		&mountains,
 		cl_mountains,
-		" @", 
+		" @",
 		"44",
 		0
 	},
@@ -376,7 +374,7 @@ const LEVEL tutorial[] =
 	}
 };
 
-const LEVEL beginner[] = 
+const LEVEL beginner[] =
 {
 	{
 		'@','E',
@@ -384,7 +382,7 @@ const LEVEL beginner[] =
 		65440,
 		&city,
 		cl_city,
-		" @                                                                                                                            h2                                                                h2            h2                                                                               h3                                                                                                                                                                 h3                                                                                 h1                          #        DD                                                                                                    UU                                                                                                                                                                                                                                                                                                                                                       #    UU                                                                     D                                                                                                           h2                                                   D                                                                            h3                                                                             h2                                                                                                      #                                          D              h3                                     UU                                             h2                                                                   h3     DD                                                                    U                                                               h2    UU      h3                                                              h3                         h3                                        #                                                                                                                             h2                                                                                        h2                                                                                            h3                           DD                                                                                                      UU                                                                                                                                                                                                                                                                                                                                                                                              h1         h2                     h3                                                                                                                                                   #", 
+		" @                                                                                                                            h2                                                                h2            h2                                                                               h3                                                                                                                                                                 h3                                                                                 h1                          #        DD                                                                                                    UU                                                                                                                                                                                                                                                                                                                                                       #    UU                                                                     D                                                                                                           h2                                                   D                                                                            h3                                                                             h2                                                                                                      #                                          D              h3                                     UU                                             h2                                                                   h3     DD                                                                    U                                                               h2    UU      h3                                                              h3                         h3                                        #                                                                                                                             h2                                                                                        h2                                                                                            h3                           DD                                                                                                      UU                                                                                                                                                                                                                                                                                                                                                                                              h1         h2                     h3                                                                                                                                                   #",
 		"4444444444444444444444444444444444444444444444444444444444444444444444444444444444333333333333333333333222222223333333333333333333333333222222222222222222222222222222221111112222222222222222222221111122222222222222222222222222222222222223333333333333333333322222222233333333333333333344444444444444444444333334444444444444444321111111112344444444444444443333333334444444444444444444321000000000000123333333333333333333333333333333333333333333333333333333333333333333344444444444444444444444333444444444444444444444444444455555555555555555555544444444444444444444444444333333333333333333333333333322222222222222222222222222111111111111111111111111222222222222222211111111111111111111111111111111111111111111111112222222222222222222211111111111111111111111111111111111111111111112222222222222222222222222211111112222222222222222222222222222222333333333333333333333333333333322222223333333333333333333333333333333333333333444444444444444444444444444444333333344444444444444444444444444433333333334444444444444444444444444444444444444444333333333333333333333333333333333333333322222222222222222222222222222222222111111122222222222222222222222222222222222222222222222222222222223333333333222233333333333333333333333333333333222222223333333333333333333333333344444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444433333333333333333333333333333332222233333333333333333333333333333333333333333333333322223333333333333333333333333333333333333333333333333332222222222222222222223333333333333333333333333333333333333333333333333333333333333333333333333333333333333344444444444444444444444333344444444444444444444444444444444444444443334444444444444444444455555555555555555555555555555555555555555555555554444445555555555555555555555555555555555555554444444444455555555555555555555555555555555555444444444444444443333334444444444444444444444444444444444444444444444444444444444444444333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333322222222222222222222221111111122222222222222222222222222222222222222221111111222222222222222222222222222222222222222222222222222222222222222222222222222221111222222222222222222222222222222222233333333333333333333333333333333333333333333333322222233333333333333333333333333333333333333333333210000000000123333333333333333332222222223333333333333333333333333332222222222222222222222222222222222222221111111122222222222222222222222222222222222222222211122222222222222222233333333333333333333333333333333333333333333333333333333222222223333333333333333332222222222222222222222222222222222222211111111222222222222222222222233322222222222233333333333333333333333333333333333333333333333222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222211112222222233333333333333333333333322222333333333333333333333333333333322222222222111222222222222222222111111112222222222221111112222222222222222222222222222222222",
 		dlg_beginner_0
 	},
@@ -404,7 +402,7 @@ const LEVEL beginner[] =
 		66150,
 		&city,
 		cl_city,
-		" @                                                                                                                                                                            m                                             m                                                              m                                      m                                                     m     m                                                     m                                       m                                           m                                        m           #                                                                                      m                                 m                                           m    m                                   m                                      m                                        m                                             m                              #                                                               m                                m                                                      m       m                                   m                                             m                                            m    m                                     m                                                      m       m                                m     m                                                              m                                 m     m         #                                                                            m                                       m    m                                       m                                 m                            m     m                                                  m                                                                                      UUU                                      h2                                                                     h2                                                                        h3              #                                                                              m                                       m                                                         m     m                               m                                           m                                     m     m                                    m                                        m                                                              m    m                                 m                                     m                                                               m                                      m    m                                m                                        m                                                 m    m                              m                                       m                                                                    m                            m    m                               m                                         #", 
+		" @                                                                                                                                                                            m                                             m                                                              m                                      m                                                     m     m                                                     m                                       m                                           m                                        m           #                                                                                      m                                 m                                           m    m                                   m                                      m                                        m                                             m                              #                                                               m                                m                                                      m       m                                   m                                             m                                            m    m                                     m                                                      m       m                                m     m                                                              m                                 m     m         #                                                                            m                                       m    m                                       m                                 m                            m     m                                                  m                                                                                      UUU                                      h2                                                                     h2                                                                        h3              #                                                                              m                                       m                                                         m     m                               m                                           m                                     m     m                                    m                                        m                                                              m    m                                 m                                     m                                                               m                                      m    m                                m                                        m                                                 m    m                              m                                       m                                                                    m                            m    m                               m                                         #",
 		"33333333333333333333333333333333333333333333333333333222222222233333333333333333333333333333333333333333333222223333333333333333333333333333333333222333333333333333333333333333333333332223333333333333333333332223333333333333333222233333333333333333333333333332222222333333333333333333333333333333222333333333333333333333333333333333333333322223333333333333333333333333322223333333333333333333333333333333333333222233333333322333333333333333333333332222333333333333322233333333333333333333333333333333333222223333333333333333333333333222222333333333222233333333333333333333333222223333333333333222222333333333333332222233333333333333333333333333333333333333333333333333332222223333333333333333333333333333333333222223333333333333223333333333333333333333333333333333332223333333333333333333333333222333333333332222233333333333333333333333333333333333333222333333333333333333333333322222233333333333332223333333333333333333333333333333222233333333333333333333333332222223333333333333333333332223333333333333333333333333333333332222333333333333333333333333333333222233333333333332223333333333333333333333333333333333333332222233333333333333333333333333322222222222333333333333333333333333333332222333333333333333333333333332233333333333333333333333333333333333332222333333333333333333333333223333333333333333222333333332233333333333333333333333333333322222233333333333333333333332223333333333333333333222333333333333322222233333333333333333333333333333333222233333333333333333333333333333333333333333333333333333332222233333322333333333333333333333333333333332223333333333333333333333222333333333333333333333333333333333322222223333333333333333333333333333333333333222223333332233333333333333332233333333332223333333333333333333332233333333333333333332222233333333333333333333322333333333333333333333333222233333333333333333333322222333333333333322333333333333333333333333333222222333333333333333333333332223333333321100001123333333333222222333333222333333333333333333333333222333333333333333333322333333333332222223333333333333333333333333333222233333333333333333333333333333322222333333333333223333333333333333333333333222222222233333333333322223333333333333333333333333333333333333322222223333333333322233333333333333333333333333333333333333333333333322222333333333333333333333333333333333332233333333333333333333333333222223333333333333333333333333333333333333332223333333333333333333332223333333333322333333333333333333333333333333333333333222233333333333333333333333333332223333333333333333333333333333333222233333333333333333333333333333333222223333333333333333333332233333333333333333333333333333333333332222223333333333333333333333333333333333333333332222223333333333333333333333333333222333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333322222333333333333333333333333333333333333322333333333333333333333333333333333333333333333333333333333333333332222233333333333333333333333333333222233333333333333333333333333333333222222222222222222222222222222222223333333333333333333333333333322222333333333333223333333333333",
 		dlg_beginner_2
 	},
@@ -439,7 +437,7 @@ const LEVEL beginner[] =
 	}
 };
 
-const LEVEL champion[] = 
+const LEVEL champion[] =
 {
 	{
 		'@','E',
@@ -568,7 +566,7 @@ const COURSE campaign[] =
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // intererences with optional noissy phrases, as post write screen effects (add method to Screen)
 Field::Field()
 {
@@ -706,7 +704,7 @@ void IsoContour(SCREEN* s, unsigned char cl, char (*cb)(int x, int y, void* p), 
 
 		for (int y=1; y<s->h; y+=4)
 		{
-			// calc 3 middle 
+			// calc 3 middle
 			sample[1][0] = cb(x-3,y+1,p);
 			sample[1][1] = cb(x,y+2,p);
 			sample[1][2] = cb(x+3,y+1,p);
@@ -758,7 +756,7 @@ void IsoContour(SCREEN* s, unsigned char cl, char (*cb)(int x, int y, void* p), 
 
 					if (dx<s->w && dy<s->h)
 					{
-						int c = dx+(s->w+1)*dy; 
+						int c = dx+(s->w+1)*dy;
 						s->buf[c] = shader[i] & 0xFF;
 
 						if (s->color)
@@ -968,7 +966,7 @@ int basher_score=250;
 // b1,b2,b3,b4	- balls: 1-tiny 2-small 3-regular 4-large
 // c			- creature
 // t			- tank
-// r			- rocket 
+// r			- rocket
 
 // SPRITES uppercase (flying objects)
 // U            - ufo
@@ -992,7 +990,7 @@ void resize_con_output(CON_OUTPUT* s, int _w, int _h, char transp)
 	for (int i=0; i<_h; i++)
 		buf2[(_w+1)*i+_w]='\n';
 	buf2[(_w+1)*_h-1]=0;
-		
+
 	int mh = MIN(s->h,_h);
 	int mw = MIN(s->w,_w);
 	for (int i=0; i<mh; i++)
@@ -1019,7 +1017,7 @@ SCREEN::~SCREEN()
 	free_con_output(this);
 	delete [] buf;
 }
-	
+
 SCREEN::SCREEN(int _w, int _h, char transp, unsigned char _tcolor)
 {
 	color=0;
@@ -1115,9 +1113,9 @@ void SCREEN::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 
 				if (over!=t)
 				{
-					if (over!='_' && over!=',' && over!='.' || 
-						// under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' || 
-						under==',' || under=='.' || under=='_' || under==' ' || 
+					if (over!='_' && over!=',' && over!='.' ||
+						// under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' ||
+						under==',' || under=='.' || under=='_' || under==' ' ||
 						(sy+y>0 && buf [ (w+1)*(sy+y-1) + sx+x ]!=t))
 					{
 
@@ -1222,7 +1220,7 @@ bool SCREEN::ClipTo(SCREEN* scr, int& dx, int& dy, int& sx, int& sy, int& sw, in
 	return sw>0 && sh>0;
 }
 
-SPRITE::~SPRITE() 
+SPRITE::~SPRITE()
 {
 }
 
@@ -1396,7 +1394,7 @@ bool SPRITE::HitTest(int sx, int sy)
 	// 1. must not be transparent
 	if (c == '*')
 		return false;
-		
+
 	// 2. rocket flames are not lethal
 	if (cookie=='r' && sx<width/2)
 		return false;
@@ -1441,7 +1439,7 @@ void SPRITE::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 	{
 		sh = height-sy;
 	}
-		
+
 	const char* img = data->mono[frame];
 	const char* clr=0;
 
@@ -1461,9 +1459,9 @@ void SPRITE::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 			if (over!='*' && (!bgkey || under==bgkey))
 			{
 				if (!blend ||
-					over!='_' && over!=',' && over!='.' || 
-					//under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' || 
-					under==',' || under=='.' || under=='_' || under==' ' || 
+					over!='_' && over!=',' && over!='.' ||
+					//under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' ||
+					under==',' || under=='.' || under=='_' || under==' ' ||
 					(sy+y>0 && img[(width+1)*(y+sy-1)+x+sx]!='*'))
 				{
 					scr->buf[(scr->w+1)*(y+dy)+dx+x] = img[(width+1)*(y+sy)+x+sx];
@@ -1534,11 +1532,11 @@ int SPRITE::AnimFrames(const ASSET* a)
 	return c;
 }
 
-CHASSIS::~CHASSIS() 
+CHASSIS::~CHASSIS()
 {
 }
 
-CHASSIS::CHASSIS():SPRITE(&chassis), b(&boom) 
+CHASSIS::CHASSIS():SPRITE(&chassis), b(&boom)
 {
 	ex = -1;
 }
@@ -1564,11 +1562,11 @@ void CHASSIS::Explode(int f)
 	ex = f;
 }
 
-SCROLL::~SCROLL() 
+SCROLL::~SCROLL()
 {
 }
 
-SCROLL::SCROLL(int _w, int _h, char transp, unsigned char _tcolor) : SCREEN(_w,_h,transp,_tcolor) 
+SCROLL::SCROLL(int _w, int _h, char transp, unsigned char _tcolor) : SCREEN(_w,_h,transp,_tcolor)
 {
 	scroll=0;
 }
@@ -1590,9 +1588,9 @@ void SCROLL::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 
 				if (over!=t)
 				{
-					if (over!='_' && over!=',' && over!='.' || 
-						// under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' || 
-						under==',' || under=='.' || under=='_' || under==' ' || 
+					if (over!='_' && over!=',' && over!='.' ||
+						// under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' ||
+						under==',' || under=='.' || under=='_' || under==' ' ||
 						(sy+y>0 && buf [ (w+1)*(sy+y-1) + sx+a+x ]!=t))
 					{
 						scr->buf [ (scr->w+1)*(dy+y) + dx+x ] = buf [ (w+1)*(sy+y) + sx+a+x ];
@@ -1608,9 +1606,9 @@ void SCROLL::Paint(SCREEN* scr, int dx, int dy, int sx, int sy, int sw, int sh, 
 
 				if (over!=t)
 				{
-					if (over!='_' && over!=',' && over!='.' || 
+					if (over!='_' && over!=',' && over!='.' ||
 						// under!='*' && under!=':' && under!='(' && under!='|' && under!=')' && under!='/' && under!='\\' ||
-						under==',' || under=='.' || under=='_' || under==' ' || 
+						under==',' || under=='.' || under=='_' || under==' ' ||
 						(sy+y>0 && buf [ (w+1)*(sy+y-1) + sx+x ]!=t))
 					{
 						scr->buf [ (scr->w+1)*(dy+y) + dx+(sw-a)+x ] = buf [ (w+1)*(sy+y) + sx+x ];
@@ -1656,7 +1654,7 @@ void SCROLL::Resize(int _w, int _h)
 	for (int i=0; i<_h; i++)
 		buf2[(_w+1)*i+_w]='\n';
 	buf2[(_w+1)*_h-1]=0;
-		
+
 	int mh = MIN(h,_h);
 	int mw = MIN(w,_w);
 
@@ -1742,9 +1740,9 @@ BACKGROUND::~BACKGROUND()
 {
 }
 
-BACKGROUND::BACKGROUND(int _w, int _h, unsigned char _tcolor) : SCROLL(_w,_h,' ',_tcolor) 
-{ 
-	Scroll(w); 
+BACKGROUND::BACKGROUND(int _w, int _h, unsigned char _tcolor) : SCROLL(_w,_h,' ',_tcolor)
+{
+	Scroll(w);
 }
 
 void BACKGROUND::Scroll(int s)
@@ -1790,19 +1788,19 @@ void BACKGROUND::Scroll(int s)
 	//twister_switch(0);
 }
 
-LANDSCAPE::~LANDSCAPE() 
+LANDSCAPE::~LANDSCAPE()
 {
 }
 
-LANDSCAPE::LANDSCAPE(int _w, int _h, const ASSET* _data, unsigned char _tcolor) : SCROLL(_w,_h,'*',_tcolor) 
-{ 
+LANDSCAPE::LANDSCAPE(int _w, int _h, const ASSET* _data, unsigned char _tcolor) : SCROLL(_w,_h,'*',_tcolor)
+{
 	data = _data;
-		
+
 	// len = (int)strlen(data->mono[0])/h;
 	// now we have \n per row (except last one)
 	len = (int)(strlen(data->mono[0])-(h-1))/h;
 
-	Scroll(w); 
+	Scroll(w);
 }
 
 void LANDSCAPE::Scroll(int s)
@@ -1840,7 +1838,7 @@ void LANDSCAPE::Scroll(int s)
 	}
 }
 
-TERRAIN::~TERRAIN() 
+TERRAIN::~TERRAIN()
 {
 	if (check_point)
 		delete [] check_point;
@@ -1864,8 +1862,8 @@ TERRAIN::~TERRAIN()
 		spr=nxt;
 	}
 }
-	
-TERRAIN::TERRAIN(int _w, int _h, int _scrh, unsigned char _tcolor, const char* sprite, const char* height, char* _hitbin, char _base_point, char _start_point, int _lives) : SCROLL(_w,_h,'*',_tcolor) 
+
+TERRAIN::TERRAIN(int _w, int _h, int _scrh, unsigned char _tcolor, const char* sprite, const char* height, char* _hitbin, char _base_point, char _start_point, int _lives) : SCROLL(_w,_h,'*',_tcolor)
 {
 	hitbin = _hitbin;
 	hits = 0;
@@ -1928,7 +1926,7 @@ TERRAIN::TERRAIN(int _w, int _h, int _scrh, unsigned char _tcolor, const char* s
 	head = tail = 0;
 	fly_head = fly_tail = 0;
 
-	Scroll(w); 
+	Scroll(w);
 }
 
 void TERRAIN::Resize(int _w, int _h)
@@ -2278,7 +2276,7 @@ bool TERRAIN::BulletTest(int fr, int x, int y, int* game_score)
 		{
 			sh=spr->height-sy;
 		}
-			
+
 		bool hit = false;
 		for (int qx=sx; !hit && qx<sx+sw; qx++)
 		{
@@ -2407,7 +2405,7 @@ bool TERRAIN::CannonTest(int x, int y, int f, int fr, int* game_score)
 	// should we test flying objects too, especially suiciders?
 	// ...
 
-		
+
 	SPRITE* hitspr = 0;
 	int hitpos = -1;
 
@@ -2487,7 +2485,7 @@ bool TERRAIN::CannonTest(int x, int y, int f, int fr, int* game_score)
 
 		int h0 = 'h0';
 		int b0 = 'b0';
-			
+
 		// custom handler
 		switch (spr->cookie)
 		{
@@ -2577,7 +2575,7 @@ bool TERRAIN::CannonTest(int x, int y, int f, int fr, int* game_score)
 					b2->prev->next=b2;
 				else
 					head = b2;
-						
+
 				spr = 0;
 				break;
 			}
@@ -2667,7 +2665,7 @@ bool TERRAIN::CannonTest(int x, int y, int f, int fr, int* game_score)
 					head = score;
 					if (!tail)
 						tail = score;
-							
+
 					spr->frame = 3;
 					spr = 0;
 				}
@@ -2756,7 +2754,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 	for (int i=0; i<bullets; i++)
 	{
 		BULLET* b = bullet+i;
-				
+
 		int dt = fr-b->fr;
 
 		// here we MUST use double ALU (so js has the same precission!)
@@ -2779,7 +2777,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 				// - on screen buffer
 
 				int rad = 6+twister_rand()%4;
-					
+
 				dep = 2+twister_rand()%4;
 				if (dep>5*rad/12)
 					dep=5*rad/12;
@@ -2788,7 +2786,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 					_________________ ileft
 					|        _________ icenter
 					|       |       __ iright
-				_|       |      |_________ level  
+				_|       |      |_________ level
 				%%\            /%%  ^
 				%%%\          /%%%  | dep
 				%%%%\________/%%%%__v
@@ -2800,7 +2798,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 				int icenter = b->sx+scroll-w;
 				int ileft = b->sx-rad+scroll-w;
 				int iright = b->sx+rad+scroll-w;
-					
+
 				if (ileft<0)
 					ileft=0;
 				if (ileft>=len)
@@ -2824,7 +2822,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 					int r = ABS(x-icenter);
 					int d = level - dep;
 					if (r>rad-dep)
-						d = level - (rad-r); 
+						d = level - (rad-r);
 
 					int round=0;
 					if (ABS(x-icenter)<rad/2)
@@ -2887,7 +2885,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 
 			}
 
-			// add poof 
+			// add poof
 
 			// create poof
 
@@ -2978,7 +2976,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 						spr->cookie_data[3] != scr_height)
 					{
 						// escape if scrolled more that 5 small screens
-						if ( scroll - spr->cookie_data[1] > 400) 
+						if ( scroll - spr->cookie_data[1] > 400)
 						{
 							int cmd = twister_rand()%4;
 							// 0 - escape left
@@ -3110,8 +3108,8 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 
 				// suiciders and (escapers on introductory) dont shoot
 				if ( spr->cookie_data[3] != scr_height &&
-						( items!=beginner[0].sprite || 
-						spr->cookie_data[2] != -spr->width && 
+						( items!=beginner[0].sprite ||
+						spr->cookie_data[2] != -spr->width &&
 						spr->cookie_data[2] != w &&
 						spr->cookie_data[3] != -spr->height ) )
 				{
@@ -3299,7 +3297,7 @@ void TERRAIN::AnimateSprites(int fr, int speed, bool expl)
 
 				if (x<70)
 				{
-					if (spr->cookie_data[0]<0 || 
+					if (spr->cookie_data[0]<0 ||
 						fr - spr->cookie_data[0] > 200) // shot every 2 sec
 					{
 						spr->cookie_data[0] = fr;
@@ -3789,7 +3787,7 @@ void TERRAIN::Scroll(int s)
 							spr->y_offset = q - spr->height;
 							spr->frame=twister_rand()%spr->frames;
 							spr->cookie=('b'<<8)|(size+'0');
-							spr->cookie_data[0] = spr->frame; // start sprite frame 
+							spr->cookie_data[0] = spr->frame; // start sprite frame
 							spr->cookie_data[1] = -1; // start game frame
 							spr->cookie_data[2] = dir;
 							break;
@@ -3917,7 +3915,7 @@ void TERRAIN::Scroll(int s)
 					color[(w+1)*(q-1)+a] = tcolor;
 			}
 
-			// %\ 	 %, 
+			// %\ 	 %,
 			// %%%	 %%%
 			if (p==q-1 && q==n)
 			{
@@ -3932,7 +3930,7 @@ void TERRAIN::Scroll(int s)
 					color[(w+1)*(q-1)+a] = tcolor;
 			}
 
-			// %\	 %,  
+			// %\	 %,
 			// %%	 %%
 			// %%%	 %%%
 			if (p==q-1 && q==n-1)
@@ -4055,7 +4053,7 @@ LEVEL_MODAL::LEVEL_MODAL(SCREEN* _s, int _lives, int _start_lives, int* _score, 
 	w=s->w;
 	h=s->h;
 	speed=0;
-		
+
 	if (start!=0)
 	{
 		// after death, start it harder
@@ -4063,7 +4061,7 @@ LEVEL_MODAL::LEVEL_MODAL(SCREEN* _s, int _lives, int _start_lives, int* _score, 
 		speed = 200;
 	}
 
-	chaisis_vert = 0; 
+	chaisis_vert = 0;
 
 	key_state = 0;
 
@@ -4100,7 +4098,7 @@ LEVEL_MODAL::LEVEL_MODAL(SCREEN* _s, int _lives, int _start_lives, int* _score, 
 	b_scroll_div = 2700;
 
 	// absolute hi-res scroll position
-	scroll = (t.scroll-t.w)*t_scroll_div; 
+	scroll = (t.scroll-t.w)*t_scroll_div;
 
 	cannon_hit = false;
 	cannon_t = -1;
@@ -4190,7 +4188,7 @@ int LEVEL_MODAL::Run()
 		if (record_cmd==0xFF00)
 		{
 			// advance by 10 seconds if there is no more input
-			record_fr+=1000; 
+			record_fr+=1000;
 		}
 
 		this_tm = start_tm + record_fr*10;
@@ -4235,7 +4233,7 @@ int LEVEL_MODAL::Run()
 		}
 		else
 		{
-			// last checkpoint passed? 
+			// last checkpoint passed?
 
 			FadeOut(2000);
 
@@ -4252,10 +4250,10 @@ int LEVEL_MODAL::Run()
 
 		int prev_b = b.scroll; // used for scroll scoreing
 
-		b.Scroll((scroll+(b.w-b.scroll)*b_scroll_div)/b_scroll_div); 
-		m.Scroll((scroll+(m.w-m.scroll)*m_scroll_div)/m_scroll_div); 
-		d.Scroll((scroll+(d.w-d.scroll)*d_scroll_div)/d_scroll_div); 
-		t.Scroll((scroll+(t.w-t.scroll)*t_scroll_div)/t_scroll_div); 
+		b.Scroll((scroll+(b.w-b.scroll)*b_scroll_div)/b_scroll_div);
+		m.Scroll((scroll+(m.w-m.scroll)*m_scroll_div)/m_scroll_div);
+		d.Scroll((scroll+(d.w-d.scroll)*d_scroll_div)/d_scroll_div);
+		t.Scroll((scroll+(t.w-t.scroll)*t_scroll_div)/t_scroll_div);
 
 		// scrolling score, (not exploded, not first frame, not passed level yet)
 		if (expl<0 && fr>=0 && t.check_passed+1 < t.check_points)
@@ -4286,7 +4284,7 @@ int LEVEL_MODAL::Run()
 			{
 				c.SetFrame(f);
 
-				// hit test with terrain & its sprites, 
+				// hit test with terrain & its sprites,
 				// (pass coords in unscrolled terrain)
 				if (!cannon_hit)
 				{
@@ -4316,7 +4314,7 @@ int LEVEL_MODAL::Run()
 		{
 			BULLET* b=bullet+i;
 			int bx = (b->x - t.scroll)*1000 + (fr-b->fr)* b->vx;
-				
+
 			// round toward previous sx!
 			int dx = (bx - 1000 * b->sx + 250) / 1000;
 			b->sx += dx;
@@ -4395,8 +4393,8 @@ int LEVEL_MODAL::Run()
 
 			// suspension gets broken!
 			if (t.check_passed+1 < t.check_points)
-			if (ABS(wheel_vert[0]-wheel_vert[1])>1 || 
-				ABS(wheel_vert[1]-wheel_vert[2])>1 || 
+			if (ABS(wheel_vert[0]-wheel_vert[1])>1 ||
+				ABS(wheel_vert[1]-wheel_vert[2])>1 ||
 				ABS(wheel_vert[0]-wheel_vert[2])>2)
 			{
 				// should match middle wheel
@@ -4515,7 +4513,7 @@ int LEVEL_MODAL::Run()
 			}
 		}
 
-		
+
 		if ((key_state & 12) != 12 && expl<0 && speed) // (speed=0 -> intro!)
 		{
 			if ((key_state & 8) || t.check_passed+1 >= t.check_points && t.check_points>1) // ACC
@@ -4645,10 +4643,10 @@ int LEVEL_MODAL::Run()
 
 				if (field>5)
 					Interference(s,
-						(int)(0.5f*(field>5.0f ? field-5.0f : 0.0f)), 
-						(int)(1.0f*(field>3 ? 3+20/(field) : 0)), 
-						scroll, 100, 
-						(int)(0.5f*(field>7? field-7:0)), 
+						(int)(0.5f*(field>5.0f ? field-5.0f : 0.0f)),
+						(int)(1.0f*(field>3 ? 3+20/(field) : 0)),
+						scroll, 100,
+						(int)(0.5f*(field>7? field-7:0)),
 						field>20.0f);
 
 				twister_switch(0);
@@ -4712,7 +4710,7 @@ int LEVEL_MODAL::Run()
 				line3[clip3++] = '#';
 
 			int width = MAX(MAX(len1,len2),len3);
-			
+
 			int y1 = 8;
 			int y2 = 9;
 			int y3 = 11;
@@ -4734,9 +4732,9 @@ int LEVEL_MODAL::Run()
 
 			if (s->color)
 			{
-				static char color1[]={0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71, 
+				static char color1[]={0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,
 									  0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74,0x74};
-				static char color2[]={0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71, 
+				static char color2[]={0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,0x71,
 									  0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70,0x70};
 				if (y1>0)
 					memcpy(s->color + y1*(s->w+1)+dx, color1, clip1);
@@ -4777,7 +4775,7 @@ int LEVEL_MODAL::Run()
 		Record(REC_SIZ,fr,nw,nh);
 
 		s->Resize(nw,nh);
-			
+
 		b.Resize(nw,16+h-19-(nh-30)/2);
 		t.scr_height = nh;
 
@@ -4787,7 +4785,7 @@ int LEVEL_MODAL::Run()
 			m.Resize(nw,16);
 			d.Resize(nw,16);
 		}
-			
+
 
 		w = nw;
 		h = nh;
@@ -4808,11 +4806,11 @@ int LEVEL_MODAL::Run()
 		/*
 		sprintf_s(status,81,"  Cars: %d Gear:%d %s %s [%c-%c] Pos: %d Write: %d b/sec  ",
 			lives,
-			key_state&4 ? 1 : key_state&8 ? 3 : 2, 
-			key_state&2 ? "Crouch" : posy>=0 ? " Jump " : "      ", 
+			key_state&4 ? 1 : key_state&8 ? 3 : 2,
+			key_state&2 ? "Crouch" : posy>=0 ? " Jump " : "      ",
 			course_name,
-			current_level->name+t.check_passed, current_level->name+t.check_passed +1, 
-			t.scroll-t.w, 
+			current_level->name+t.check_passed, current_level->name+t.check_passed +1,
+			t.scroll-t.w,
 			write_persec);
 		*/
 
@@ -4844,7 +4842,7 @@ int LEVEL_MODAL::Run()
 			memset(s->color+(s->w-statlen)/2,cl_statlabel,9);
 			memset(s->color+(s->w-statlen)/2+9,cl_statvalue,statlen-9);
 		}
-		
+
 		// right
 		int t_min = *level_time/(1000*60);
 		int t_sec = (*level_time - t_min*(1000*60))/1000;
@@ -4890,7 +4888,7 @@ int LEVEL_MODAL::Run()
 				        :    LEFT HAND    :  RIGHT HAND  : 3 :
 				     -- +-----+-----+-----+--------------+---+ -- 0
 				        |     |     |     |              | X | 3 cells
-				        | LFT |     | RGT |      JUMP    +---+ -- 
+				        | LFT |     | RGT |      JUMP    +---+ --
 				        |     |     |     +------------------+ -- v-half
 				     -- +-----+-----+-----+                  |
 				3 cells | L-L | DWN | L-R |      FIRE        |
@@ -5175,17 +5173,17 @@ int LEVEL_MODAL::Run()
 					case 27:
 						key=64; break;
 
-					case KBD_UP: 
+					case KBD_UP:
 						key=1; break;
 
 					// SNEAKING
-					case KBD_DN: 
+					case KBD_DN:
 						key=2; break;
 
-					case KBD_LT: 
+					case KBD_LT:
 						key=4; break;
 
-					case KBD_RT: 
+					case KBD_RT:
 						key=8; break;
 
 					case 13:
@@ -5226,7 +5224,7 @@ int LEVEL_MODAL::Run()
 						if (!HasKeyReleases())
 						//##
 						{
-							// sticky 'A' , release 'D'								
+							// sticky 'A' , release 'D'
 							if (key==4)
 							{
 								if (key_state&8)
@@ -5249,7 +5247,7 @@ int LEVEL_MODAL::Run()
 						if (!HasKeyReleases())
 						//##
 						{
-							// sticky 'D' , release 'A'								
+							// sticky 'D' , release 'A'
 							if (key==8)
 							{
 								if (key_state&4)
@@ -5272,7 +5270,7 @@ int LEVEL_MODAL::Run()
 						if (!HasKeyReleases())
 						//##
 						{
-							// sticky 'S'								
+							// sticky 'S'
 							if (key==2 && posy<0)
 							{
 								key_state |= 2; // press down
@@ -5286,7 +5284,7 @@ int LEVEL_MODAL::Run()
 							if (!HasKeyReleases())
 							//##
 							{
-								// release 'S'								
+								// release 'S'
 								if (key_state&2)
 								{
 									key_state &= ~2; // release down
@@ -5719,11 +5717,11 @@ void LEVEL_MODAL::Record(int ev, unsigned int _fr, unsigned long a, unsigned lon
 	{
 		if (diff_fr > 32)
 		{
-			// emitt long skip	
+			// emitt long skip
 			int d = diff_fr;
 			if (diff_fr > 8224)
 				d=8224;
-			
+
 			diff_fr-=d;
 
 			d-=33; // bias
@@ -5743,18 +5741,18 @@ void LEVEL_MODAL::Record(int ev, unsigned int _fr, unsigned long a, unsigned lon
 		else
 		if (diff_fr > 0)
 		{
-			// emitt short skip	
+			// emitt short skip
 			int d = diff_fr;
 			diff_fr = 0;
-			
+
 			d-=1;
 			d|=0x00; // cmd
 
 			unsigned char d0 = d&0xFF;
-			
+
 			d0 ^= rec_score;
 			crypt_enc(&d0);
-			
+
 			rec_write(d0);
 		}
 	}
@@ -5766,7 +5764,7 @@ void LEVEL_MODAL::Record(int ev, unsigned int _fr, unsigned long a, unsigned lon
 		case REC_END:
 		{
 			unsigned char d0 = 0xFF;
-			
+
 			d0 ^= rec_score;
 			crypt_enc(&d0);
 
@@ -5924,7 +5922,7 @@ int InterScreenInput()
 				int w,h;
 				get_terminal_wh(&w,&h);
 
-				if (ir[i].Event.TouchEvent.x >= w-(w>>3) && 
+				if (ir[i].Event.TouchEvent.x >= w-(w>>3) &&
 					ir[i].Event.TouchEvent.y <= (h>>3))
 				{
 					return -2;
@@ -5957,4 +5955,3 @@ int InterScreenInput()
 
 	return 0;
 }
-
