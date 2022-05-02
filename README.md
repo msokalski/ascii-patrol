@@ -108,7 +108,7 @@ chmod +x *.sh
 Homebrew install libraries (works with Clang or GCC):
 
 ```sh
-brew install libxi pulseaudio
+brew install libx11 libxi pulseaudio
 ```
 
 Build:
@@ -163,7 +163,7 @@ However, if $ASCII_PATROL_CONFIG_DIR or $ASCII_PATROL_RECORD_DIR are set, then t
 
 ## Problems?
 
-- no sound? -> install / start pulseaudio
+- no sound? -> install / start pulseaudio ( ie: `pulseaudio -v -C` )
 - weird colors? -> try another terminal emulator or run from raw console (ctrl-alt-F1 or so)
 - poor font look? -> try changing font in your terminal or in case of raw console use setfont
 - keyboard doesn't work? -> try another terminal emulator or run from raw console
