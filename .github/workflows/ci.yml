@@ -17,6 +17,7 @@ on:
 jobs:
 
   windows-msvc:
+    timeout-minutes: 5
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,6 +29,7 @@ jobs:
       run: cmake --build build --config Release --parallel
 
   windows-gcc:
+    timeout-minutes: 5
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -39,6 +41,7 @@ jobs:
       run: cmake --build build --parallel
 
   linux:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     strategy:
@@ -62,7 +65,12 @@ jobs:
       run: cmake --build build --parallel
 
   mac:
+    timeout-minutes: 10
     runs-on: mac-latest
+
+    env:
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+
     steps:
     - uses: actions/checkout@v2
 
