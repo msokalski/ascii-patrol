@@ -36,6 +36,8 @@ static Window victim; // our victim
 #ifndef FIONREAD
 	// CYGWIN
 	#include <sys/socket.h>
+#elif defined(__APPLE__)
+	#include <fcntl.h>
 #else
 	// LINUX
 	#include <linux/kd.h>
@@ -214,7 +216,7 @@ char read_char()
 				read_buf[0] = tilde;
 				read_len = 1;
 			}
-			
+
 			return ch;
 		}
 		else
@@ -343,7 +345,7 @@ bool spec_read_input(CON_INPUT* ir, int n, int* r)
 					 (ir[i].Event.KeyEvent.uChar.AsciiChar == 'c' ||
 					  ir[i].Event.KeyEvent.uChar.AsciiChar == 'C') )
 				{
-					// do not put ^C 
+					// do not put ^C
 					i--;
 					raise(SIGINT);
 				}
@@ -608,7 +610,7 @@ static void initTermios()
     int flags;
 
     /* save old keyboard mode */
-    if (ioctl(0, KDGKBMODE, &old_keyboard_mode) >= 0) 
+    if (ioctl(0, KDGKBMODE, &old_keyboard_mode) >= 0)
 	{
 
 		/* make stdin non-blocking */
@@ -646,8 +648,10 @@ static void initTermios()
 static void resetTermios(void)
 {
 	tcsetattr(0, TCSAFLUSH, &old);
+#ifndef __APPLE__
 	if (raw_keyboard)
 		ioctl(0, KDSKBMODE, old_keyboard_mode);
+#endif
 }
 
 static int ansi_key_autorep(bool on)
@@ -671,7 +675,7 @@ static int ansi_show_cursor(bool show)
     if (show)
 	return printf("\x1B[?25h");
     else
-	return printf("\x1B[?25l"); 
+	return printf("\x1B[?25l");
 }
 
 static int ansi_goto_xy(int x, int y)
@@ -835,7 +839,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 		dpy = XOpenDisplay(NULL);
 
 
-		if (!dpy) 
+		if (!dpy)
 		{
 			printf("unable to connect to X11 display\nfalling back to sticky stdin!\n");
 		}
@@ -876,7 +880,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 									  False,
 									  GrabModeAsync,
 									  GrabModeAsync,
-									  CurrentTime); 
+									  CurrentTime);
 				*/
 
 				XFlush(dpy);
@@ -950,7 +954,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 		int j=0;
 		while (i<sh)
 		{
-			while (i<sh && 
+			while (i<sh &&
 				memcmp(buf+(w+1)*i,arr+(w+1)*i,w+1)==0 &&
 				(!color || memcmp(color+(w+1)*i,arr+(w+1)*(i+h),w+1)==0))
 				i++;
@@ -989,7 +993,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 			{
 				char swap = buf[(w+1)*j-1];
 				buf[(w+1)*j-1] = 0;
-				
+
 				size += printf("%s",buf+(w+1)*i);
 
 				// unclip
@@ -1033,7 +1037,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 			char swap = buf[(w+1)*sh-1];
 			buf[(w+1)*sh-1] = 0;
 
-			printf("%s",buf); 
+			printf("%s",buf);
 
 			// unclip
 			buf[(w+1)*sh-1] = swap;
@@ -1077,7 +1081,7 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 			screen->arr = arr;
 		}
 	}
-		
+
 	fflush(stdout);
 	return size;
 }
@@ -1220,7 +1224,7 @@ void* hiscore_proc(void* p)
 					}
 
 					// change last cr to eof
-					tmp.buf[55 * tmp.siz -1] = 0; 
+					tmp.buf[55 * tmp.siz -1] = 0;
 				}
 
 				fclose(f);
@@ -1257,7 +1261,7 @@ void* hiscore_proc(void* p)
 	}
 
 	*(int*)p = 0; // clear running flag
-	
+
 	pthread_exit((void*)(intptr_t)err);
 	return (void*)(intptr_t)err;
 }
@@ -1507,7 +1511,7 @@ static void audio_stream_write_cb(pa_stream *p, size_t nbytes, void *user)
 	const int frq=44100;
 	const int smp=frq/4; // 0.25s buf
 
-	short pull[nch*smp]; 
+	short pull[nch*smp];
 
 	int samples = nbytes / 4;
 
@@ -1684,7 +1688,7 @@ static void audio_context_state_cb(pa_context* c, void* user)
 {
 	switch (pa_context_get_state(c))
 	{
-		case PA_CONTEXT_CONNECTING: 
+		case PA_CONTEXT_CONNECTING:
 		{
 			printf("Pulse: Context connecting...\n");
 			break;
@@ -1723,7 +1727,7 @@ void init_sound()
 		return;
 
 	pa_proplist *plist = pa_proplist_new();
-	
+
 	pa_proplist_sets(plist, PA_PROP_APPLICATION_NAME, "ascii-patrol");
 	pa_proplist_sets(plist, PA_PROP_APPLICATION_VERSION, "alpha 2.0");
 	pa_proplist_sets(plist, PA_PROP_MEDIA_ROLE, "game");
@@ -1869,7 +1873,7 @@ bool play_sfx(unsigned int id, void** voice, bool loop, int vol, int pan)
 
 		v->id = id; // data & size is @ sfx_buf[v->id]
 		v->next = sfx_voice;
-			
+
 		v->vol  = sfx_gain;
 		v->gain = vol;
 		v->pan  = 0;

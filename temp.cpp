@@ -104,8 +104,8 @@ void MakeTerrain(const char* path, int len)
 	int hole_dist=80;
 
 	int crack_mod = 4;
-	
-	int hole_creature_mod = 1; 
+
+	int hole_creature_mod = 1;
 	int hole_edge_enemy_mod = 1;
 
 	int hole_edge_t=1;
@@ -420,7 +420,7 @@ void MakeTerrain(const char* path, int len)
 				epos = edge_right+2;
 			else
 			{
-				if (kind=='t') 
+				if (kind=='t')
 					epos = edge_right+2+30; // bit more space
 				else
 					epos = edge_right+2+20; // with landing place
@@ -832,15 +832,15 @@ struct CAMPAIGN_MODAL : MODAL
 					if (record_file)
 					{
 						int t;
-						
-						t=w^score; 
+
+						t=w^score;
 						crypt_enc(&t);
 						fwrite(&t,4,1,record_file);
-						
-						t=h^score; 
+
+						t=h^score;
 						crypt_enc(&t);
 						fwrite(&t,4,1,record_file);
-						
+
 						twister_write(record_file);
 
 						fclose(record_file);
@@ -866,13 +866,13 @@ struct CAMPAIGN_MODAL : MODAL
 					fopen_s(&record_file,record_path(),"ab");
 					if (record_file)
 					{
-						unsigned int chk[5] = 
+						unsigned int chk[5] =
 						{
-							twister_rand(),
-							twister_rand(),
+							static_cast<unsigned int>(twister_rand()),
+							static_cast<unsigned int>(twister_rand()),
 							crypt_chk(),
-							twister_rand(),
-							twister_rand()
+							static_cast<unsigned int>(twister_rand()),
+							static_cast<unsigned int>(twister_rand())
 						};
 
 						fwrite(chk,1,15+(rand()%5),record_file);
@@ -882,7 +882,7 @@ struct CAMPAIGN_MODAL : MODAL
 					// post recording to the server
 					// delete recording file?
 					post_hiscore();
-					
+
 					inter_modal = new GAMEOVER_MODAL(
 						&global_screen,
 						&score,
@@ -917,7 +917,7 @@ struct CAMPAIGN_MODAL : MODAL
 			///////////////////////////
 			// so ret is -1
 
-			// level finished. 
+			// level finished.
 			// prepare interscreen
 
 			// calc hitacc from hitbin
@@ -1031,15 +1031,15 @@ struct CAMPAIGN_MODAL : MODAL
 				{
 
 					int t;
-					
-					t=w^score; 
+
+					t=w^score;
 					crypt_enc(&t);
 					fwrite(&t,4,1,record_file);
-					
-					t=h^score; 
+
+					t=h^score;
 					crypt_enc(&t);
 					fwrite(&t,4,1,record_file);
-					
+
 					twister_write(record_file);
 
 					fclose(record_file);
@@ -1056,7 +1056,7 @@ struct CAMPAIGN_MODAL : MODAL
 					iSubLev, hitbin);
 				return -1;
 			}
-			
+
 			if (ret == -2)
 			{
 				// quit to menu?
@@ -1108,7 +1108,7 @@ struct MENU_MODAL : MODAL
 			{
 				// quit to menu doesn't change current play pattern
 				// ensures only we have full range loop
-				PlayLoop(0,-1,0,29);				
+				PlayLoop(0,-1,0,29);
 
 				// permanent end
 				if (hold_modal)
@@ -1222,7 +1222,7 @@ bool GameOnHold(int* course, int* level, int* sublevel, int* percent, int* score
 			LEVEL_MODAL* lm = (LEVEL_MODAL*)cm->level_modal;
 			if (lives)
 				*lives  = lm->lives; // this one is more fresh
-			
+
 
 			if (lm->t.check_passed+1 >= lm->t.check_points)
 			{
@@ -1377,7 +1377,7 @@ struct INTRO_MODAL : MODAL
 			int nw = dw;
 			int nh = dh;
 
-		
+
 			if (nw>160)
 				nw=160;
 			if (nw<80)
@@ -1467,7 +1467,7 @@ struct INTRO_MODAL : MODAL
 			afr = MIN(5,afr);
 
 			int ax = (s->w - (5*10-ascii_krn[4]))/2;
-		
+
 			int i=0;
 			for (; i<afr; i++)
 			{
@@ -1533,7 +1533,7 @@ INTRO_MODAL intro_modal;
 
 int FREAD(void* buf, int siz, int cnt, FILE* fil)
 {
-	if ( fread(buf,siz,cnt,fil) != cnt ) 
+	if ( fread(buf,siz,cnt,fil) != cnt )
 		exit(-1);
 	return cnt;
 }
@@ -1820,7 +1820,7 @@ int validate_score(const char* path, int* avatar, char* name)
 	delete level_modal;
 
 	fclose(record_file);
-	
+
 	return -1;
 }
 
@@ -2300,4 +2300,3 @@ void SetColorMode(unsigned char cl)
 		}
 	}
 }
-

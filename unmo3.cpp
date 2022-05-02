@@ -6,7 +6,7 @@
 
 #include <memory.h>
 #include <stdlib.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -123,7 +123,7 @@ unsigned char * mo3_unpack(unsigned char *src, unsigned char *dst, mo3_long size
   }
 
 
-  if ( (dst-initDst)!=initSize ) 
+  if ( (dst-initDst)!=initSize )
   {
   }
 
@@ -169,11 +169,11 @@ bool OpenSong(SONG* song)
 	unsigned char* song_seq = hdr_ptr;
 	hdr_ptr += nfo->song_len;
 
-	// voice seq (for each pattern, and each channel, number of voice data) : identical voices are detected and factorized at compression. 
+	// voice seq (for each pattern, and each channel, number of voice data) : identical voices are detected and factorized at compression.
 	unsigned short* voice_seq = (unsigned short*)hdr_ptr;
 	hdr_ptr += 2 * nfo->patterns * nfo->channels;
 
-	// pattern length table (size=nb_patt*2) 
+	// pattern length table (size=nb_patt*2)
 	unsigned short* pattern_len = (unsigned short*)hdr_ptr;
 	hdr_ptr += 2*nfo->patterns;
 
@@ -240,7 +240,7 @@ bool OpenSong(SONG* song)
 
 		// warning, we are overwriting unused part of decded data!
 		sample_data[i]->ogg_header = i;
-		if ( file_hdr->ver>=5 && (sample_data[i]->flags&0x5000) == 0x5000 ) 
+		if ( file_hdr->ver>=5 && (sample_data[i]->flags&0x5000) == 0x5000 )
 		{
 		  sample_data[i]->ogg_header = GET_WORD(hdr_ptr);
 		  hdr_ptr+=2;
@@ -500,7 +500,7 @@ int XMChannel::Smp(float t)
 	if (sample->flags & 0x0010)
 	{
 		// loop enabled
-		if (sample->flags & 0x0020) 
+		if (sample->flags & 0x0020)
 		{
 			// bidi loop
 			if (t1>=sample->end)
@@ -556,7 +556,7 @@ struct XMPlayer
 	SONG song;
 
 	int song_seq;	// song position ( % song->nfo->song_len )
-	int pattern;	// current pattern 
+	int pattern;	// current pattern
 	int row;		// processed in current pattern ( % song->pattern_len[pattern] )
 	int tick;		// processed in current row ( % song->nfo->ticks_per_row )
 
@@ -579,7 +579,7 @@ struct XMPlayer
 	int fade_ofs;
 
 	int cmd_sync; // -1 nutting
-	int cmd_start; 
+	int cmd_start;
 	int cmd_loop_a;
 	int cmd_loop_b;
 
@@ -781,7 +781,7 @@ void XMPlayer::Row()
 	sprintf_s(r,32,"%02d / %02d : ", pattern, row);
 	OutputDebugStringA(r);
 
-	// main task is to advance 
+	// main task is to advance
 	for (int c=0; c<song.nfo->channels; c++)
 	{
 		if (!chn[c].voice_ptr)
@@ -806,7 +806,7 @@ void XMPlayer::Row()
 		chn[c].row_reps++;
 
 		int pairs = n&0x0F;
-		
+
 		if (pairs)
 		{
 			Cmd(c,ptr,pairs);
@@ -836,7 +836,7 @@ const static char* notes[12]=
 	"D-",
 	 	"D#",
 	"E-",
-	 
+
 	"F-",
 	 	"F#",
 	"G-",
@@ -880,25 +880,25 @@ void XMPlayer::Cmd(int c, unsigned char* data, int pairs)
 				{
 					dbg[0]='X';
 					dbg[1]='X';
-					dbg[2]='X';				
+					dbg[2]='X';
 				}
 				else if (key==0xfe)
 				{
 					dbg[0]='^';
 					dbg[1]='^';
-					dbg[2]='^';				
+					dbg[2]='^';
 				}
 				else if (chn[c].sample && !porta)
 				{
 					// if prev note is still alive
-					// we should move its context to nano-fadeout 
+					// we should move its context to nano-fadeout
 					// current params with upto 1-tick fade during mixing
 
 					int fade_ch = c+song.nfo->channels;
 					chn[fade_ch] = chn[c];
 
 					// here we store fade progress in output samples
-					chn[fade_ch].vol_slide = 0; 
+					chn[fade_ch].vol_slide = 0;
 
 					// clear others
 					chn[fade_ch].tone_porta=0;
@@ -1169,7 +1169,7 @@ void XMPlayer::Mix(int ch, int frq, short* buffer, int samples)
 				float scale = chn[c].frq / frq;
 
 				// norm = 256*64
-				int vol0 = amp0 * ext_vol * chn[c].vol0*chn[c].evol0 / 65536; 
+				int vol0 = amp0 * ext_vol * chn[c].vol0*chn[c].evol0 / 65536;
 				int vol1 = amp1 * ext_vol * chn[c].vol*chn[c].evol1 / 65536;
 
 				if (c>=song.nfo->channels)
@@ -1183,7 +1183,7 @@ void XMPlayer::Mix(int ch, int frq, short* buffer, int samples)
 
 						// APPLY TCK interpolator (mono)
 						int vol = vol0 + (vol1-vol0) * (xm_player.aud_rem+i)/tick_samples;
-						
+
 						a = buffer[i] + a*vol / (256*64);
 
 						if (a>32767)

@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "**.cpp"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "**.cpp"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/ci.yml"
+
+jobs:
+
+  windows-msvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure
+      run: cmake -Bbuild -G "Visual Studio 17 2022"
+
+    - name: Build
+      run: cmake --build build --config Release --parallel
+
+  windows-gcc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure
+      run: cmake -Bbuild -G "MinGW Makefiles"
+
+    - name: Build
+      run: cmake --build build --parallel
+
+  linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        cxx: [g++, clang++]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install prereqs
+      run: |
+        sudo apt update
+        sudo apt install --no-install-recommends libxi-dev libx11-dev libpulse-dev
+
+    - name: Configure
+      run: cmake -Bbuild
+      env:
+        CXX: ${{ matrix.cxx }}
+
+    - name: Build
+      run: cmake --build build --parallel
+
+  mac:
+    runs-on: mac-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install prereqs
+      run: brew install libxi libx11 pulseaudio
+
+    - name: Configure
+      run: cmake -Bbuild
+
+    - name: Build
+      run: cmake --build build --parallel
