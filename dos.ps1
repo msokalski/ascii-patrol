@@ -1,8 +1,15 @@
-$env:WATCOM = "C:\WATCOM"
-$env:EDPATH = "C:\WATCOM\EDDAT"
-$env:WHTMLHELP = "C:\WATCOM\BINNT\HELP"
-$env:WIPFC = "C:\WATCOM\WIPFC"
-$env:LIBPATH = "C:\WATCOM\lib386\"
+$watcom = "C:\WATCOM"
 
-$env:INCLUDE += ";C:\WATCOM\H;C:\WATCOM\H\NT;C:\WATCOM\H\NT\DIRECTX;C:\WATCOM\H\NT\DDK"
-$env:Path += ";C:\WATCOM\BINNT64;C:\WATCOM\BINNT"
+if (!(Test-Path -Path $watcom)) {
+  Throw "OpenWatcom not found at $watcom"
+}
+
+$env:WATCOM = $watcom
+$env:EDPATH = "$watcom\EDDAT"
+$env:WHTMLHELP = "$watcom\BINNT\HELP"
+$env:WIPFC = "$watcom\WIPFC"
+
+$env:LIBPATH = "$watcom\lib386\"
+$env:INCLUDE = "$watcom\H"
+
+$env:Path += ";$watcom\BINNT64;$watcom\BINNT"

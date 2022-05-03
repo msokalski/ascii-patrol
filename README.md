@@ -150,7 +150,7 @@ The files build/asciipat.js, build/asciipat.wasm are thereby created.
 ### DOS (OpenWatcom)
 
 Necessary environment variables must be set for OpenWatcom to work.
-We provide a PowerShell script [dos.ps1](./dos.ps1) for Windows to set these environment variables.
+We provide a PowerShell script [dos.ps1](./dos.ps1) for Windows and shell script [dos.sh](./dosh.sh) to set these environment variables.
 CMake cross-compile for DOS from Windows/Linux:
 
 ```sh

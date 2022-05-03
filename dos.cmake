@@ -2,7 +2,12 @@ set(CMAKE_SYSTEM_NAME DOS)
 set(CMAKE_GENERATOR "Watcom WMake")
 
 if(NOT DEFINED ENV{WATCOM})
-  message(FATAL_ERROR "WATCOM environment variable not set. Try running dos.ps1 to set it if on Windows.")
+  if(WIN32)
+    set(scr dos.ps1)
+  else()
+    set(scr dos.sh)
+  endif()
+  message(FATAL_ERROR "WATCOM environment variable not set. Try running ${scr} first.")
 endif()
 
 file(TO_CMAKE_PATH "$ENV{WATCOM}" watcom_root)
