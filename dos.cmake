@@ -9,9 +9,15 @@ file(TO_CMAKE_PATH "$ENV{WATCOM}" watcom_root)
 
 set(CMAKE_SYSROOT ${watcom_root})
 
+if(WIN32)
+  set(bin ${watcom_root}/binnt64 ${watcom_root}/binnt)
+else()
+  set(bin ${watcom_root}/binl64 ${watcom_root}/binl)
+endif()
+
 find_program(CMAKE_CXX_COMPILER
 NAMES wcl386
-HINTS ${watcom_root}/binl64 ${watcom_root}/binl ${watcom_root}/binnt64 ${watcom_root}/binnt
+HINTS ${bin}
 NO_DEFAULT_PATH
 REQUIRED
 )
