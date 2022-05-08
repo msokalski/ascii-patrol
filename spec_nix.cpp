@@ -1,7 +1,3 @@
-
-#ifdef NIX
-
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xresource.h>
@@ -2045,5 +2041,3 @@ bool set_sfx_params(void* voice, int vol, int pan)
 	pthread_mutex_unlock(&sfx_cs);
 	return false;
 }
-
-#endif

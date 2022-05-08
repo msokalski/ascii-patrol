@@ -1,6 +1,3 @@
-
-
-#ifdef DOS
 #include <dos.h>
 #include <string.h>
 #include <stdio.h>
@@ -14,6 +11,10 @@
 #include "spec.h"
 #include "conf.h"
 #include "menu.h"
+
+float powf(float f, float n){
+	return pow(f,n);
+};
 
 void DBG(const char* str)
 {
@@ -72,10 +73,10 @@ void LoadFont(unsigned char* get, const unsigned char* set, int char_height)
 	outpw(0x03ce,5);		// clear even/odd mode
 	outpw(0x03ce,0x0406);	// map vga to a0000
 	outpw(0x03c4,0x0402);	// set bitplane 2
-	outpw(0x03c4,0x0604);	// clear even/odd mode 
+	outpw(0x03c4,0x0604);	// clear even/odd mode
 
 	unsigned char* ptr = (unsigned char*)0xA0000;
-	
+
 	if (get)
 	{
 		for (int i=0; i<256; i++)
@@ -84,7 +85,7 @@ void LoadFont(unsigned char* get, const unsigned char* set, int char_height)
 				get[i*char_height+y] = ptr[i*32+y];
 		}
 	}
-	
+
 	if (set)
 	{
 		for (int i=0; i<256; i++)
@@ -93,12 +94,12 @@ void LoadFont(unsigned char* get, const unsigned char* set, int char_height)
 				ptr[i*32+y] = set[i*char_height+y];
 		}
 	}
-	
+
 	// restore vga
 	outpw(0x03c4,0x0302);
 	outpw(0x03c4,0x0204);
 	outpw(0x03ce,0x1005);
-	outpw(0x03ce,0x0E06);	
+	outpw(0x03ce,0x0E06);
 }
 
 static int  screen_w=0;
@@ -119,7 +120,7 @@ static  void    interrupt (*oldfunc)(void);     // interrupt function pointer
 static unsigned int tv_fives=0;
 static unsigned int tv_ticks=0;
 
-static void interrupt handle_clock(void) 
+static void interrupt handle_clock(void)
 {
     static  int     callmod = 0;
 
@@ -135,16 +136,16 @@ static void interrupt handle_clock(void)
     callmod = (callmod+1)%64;
 
     /* If this is the 64th call, then call handler */
-    if (callmod == 0) 
+    if (callmod == 0)
             oldfunc();
-	else 
+	else
             outp(0x20,0x20);        // End of interrupt
 }
 
-static void stop_fastclock(void) 
+static void stop_fastclock(void)
 {
     /* See if the clock is on - exit if not */
-    if (!fastclock_on) 
+    if (!fastclock_on)
 	{
             return;
     }
@@ -167,10 +168,10 @@ static void stop_fastclock(void)
     fastclock_on = 0;
 }
 
-static int start_fastclock(void) 
+static int start_fastclock(void)
 {
 	/* Make sure the clock is not already set faster */
-	if (fastclock_on) 
+	if (fastclock_on)
 	{
 			return(-1);
 	}
@@ -710,7 +711,7 @@ void terminal_done()
 {
 	stop_fastclock();
 	_dos_setvect (Keyboard_Int, old_keyboard);
-	
+
 	switch (screen_font)
 	{
 		case 14:
@@ -727,32 +728,32 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 
 	Word seg,sel;
 	video_BIOS* video;
-		
+
 	union REGS regs={0};
-	struct SREGS sregs={0}; 
+	struct SREGS sregs={0};
 	struct RMI rmi={0};
-	
+
 	AllocateDosMemory((sizeof(video_BIOS)+15)>>4,&seg,&sel);
 	video = (video_BIOS*)(seg<<4);
-	
+
 	rmi.EAX = 0x1B00;
 	rmi.ES = seg;
-	
+
 	regs.w.bx = 0x10;
 	regs.x.eax = 0x300;
 	regs.x.ecx = 0;
     sregs.es = FP_SEG(&rmi);
-    regs.x.edi = FP_OFF(&rmi);	
-	
+    regs.x.edi = FP_OFF(&rmi);
+
 	int386x(0x31,&regs,&regs,&sregs);
-	
+
 	screen_w = video->cols;
 	screen_h = video->rows;
 	screen_font = video->font;
 	screen_lines = video->scanlines;
-	
+
 	DeallocateDosMemory(sel);
-	
+
 	printf("cols:%d, rows:%d, font:%d, lines:%d\n",screen_w,screen_h,screen_font,screen_lines);
 
 	*dw=screen_w;
@@ -767,7 +768,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
             mov bl,0h
             int 10h
     }
-	
+
 	switch (screen_font)
 	{
 		case 14:
@@ -782,7 +783,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 	outp(0x3D4,0x0F);
 	outp(0x3D5,position & 0xFF);
 	outp(0x3D4,0x0E);
-	outp(0x3D5,(position>>8) & 0xFF);	
+	outp(0x3D5,(position>>8) & 0xFF);
 
 	start_fastclock();
     old_keyboard = _dos_getvect (Keyboard_Int);
@@ -813,6 +814,9 @@ int screen_write(CON_OUTPUT* screen, int dw, int dh, int sx, int sy, int sw, int
 	int h = screen->h;
 	char* buf = screen->buf;
 	char* color = screen->color;
+
+	int dx=0;
+	int dy=0;
 
 	unsigned char pal_conv[16]=
 	{
@@ -934,7 +938,7 @@ void request_hiscore()
 				}
 
 				// change last cr to eof
-				tmp.buf[55 * tmp.siz -1] = 0; 
+				tmp.buf[55 * tmp.siz -1] = 0;
 			}
 
 			fclose(f);
@@ -1037,7 +1041,3 @@ bool set_sfx_params(void* voice, int vol, int pan)
 {
 	return false;
 }
-
-
-#endif
-

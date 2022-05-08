@@ -1,7 +1,3 @@
-
-#ifdef WEB
-
-
 #include <emscripten.h>
 #include <memory.h>
 #include <stdlib.h>
@@ -36,7 +32,7 @@ int terminal_init(int argc, char* argv[], int* dw, int* dh)
 	EM_ASM(
 		FS.mkdir('/asciipat');
 		FS.mount(IDBFS, {}, '/asciipat');
-		FS.syncfs(true, function (err) 
+		FS.syncfs(true, function (err)
 		{
 			if (!err)
 			{
@@ -380,7 +376,7 @@ extern "C"
 			}
 
 			// change last cr to eof
-			tmp.buf[55 * tmp.siz -1] = 0; 
+			tmp.buf[55 * tmp.siz -1] = 0;
 		}
 
 		if (!err)
@@ -410,8 +406,8 @@ void terminal_loop()
 	srand(x+0x1234);
 	unsigned int r = rand()%1461866239;
 
-	unsigned int token = 
-		EM_ASM_INT(	
+	unsigned int token =
+		EM_ASM_INT(
 		{
 			var _uy = new Array('M','d','l','h','D','f','n','c','a','o','o','o','a','l','o','h','t','c','c','s','t','o','w','a','h','u','a','t','e','o','6','r','0','m','t','3','7','r','5','C','7','e','i','8','3','6','6','o','2','n','o','9','5','7','2','d','9','t','n','6','5','2','2','e','2','6','4','7','5','6','0','A','0','4','6','2','8','1','5','t');
 
@@ -431,7 +427,7 @@ void terminal_loop()
 			var _uv  = '>' + _kt + _ku[_ff][_tr][_px];
 			var _qp = 0;
 			var _aw = _uv.length;
-			for (var _ti = 0; _ti < _aw; _ti++) 
+			for (var _ti = 0; _ti < _aw; _ti++)
 				_qp  = (((_qp << 5) - _qp) + _uv[_yy](_ti)) | 0;
 			return _qp;
 
@@ -475,10 +471,10 @@ void terminal_loop()
 
 void write_fs()
 {
-	EM_ASM(	
-		FS.syncfs( function(err) 
-		{ 
-		}); 
+	EM_ASM(
+		FS.syncfs( function(err)
+		{
+		});
 	);
 }
 
@@ -632,6 +628,3 @@ bool set_sfx_params(void* voice, int vol, int pan)
 
 	return true;
 }
-
-
-#endif

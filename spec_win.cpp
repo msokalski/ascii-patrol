@@ -1,7 +1,3 @@
-
-
-#ifdef WIN
-
 #include <algorithm>
 #include <windows.h>
 #include <Shlobj.h>
@@ -1379,5 +1375,3 @@ void unlock_player()
 	if (sound_thread)
 		LeaveCriticalSection(&player_cs);
 }
-
-#endif
