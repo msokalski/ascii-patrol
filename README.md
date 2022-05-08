@@ -71,6 +71,14 @@ git clone https://github.com/msokalski/ascii-patrol.git
 cd ascii-patrol
 ```
 
+For Windows, Linux, and MacOS builds the sound is optional and by default on.
+To disable sound (removing the need for PulseAudio) configure with:
+
+```sh
+cmake -Bbuild -Dsound=off
+cmake --build build
+```
+
 ### Linux
 
 The needed libraries are installed like:
