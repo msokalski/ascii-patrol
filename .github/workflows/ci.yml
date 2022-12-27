@@ -17,33 +17,47 @@ on:
 jobs:
 
   windows-msvc:
+    timeout-minutes: 5
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        sound: [true, false]
+
     steps:
     - uses: actions/checkout@v2
 
     - name: Configure
-      run: cmake -Bbuild -G "Visual Studio 17 2022"
+      run: cmake -Bbuild -G "Visual Studio 17 2022" -Dsound:BOOL=${{ matrix.sound }}
 
     - name: Build
       run: cmake --build build --config Release --parallel
 
   windows-gcc:
+    timeout-minutes: 5
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        sound: [true, false]
+
     steps:
     - uses: actions/checkout@v2
 
     - name: Configure
-      run: cmake -Bbuild -G "MinGW Makefiles"
+      run: cmake -Bbuild -G "MinGW Makefiles" -Dsound:BOOL=${{ matrix.sound }}
 
     - name: Build
       run: cmake --build build --parallel
 
   linux:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         cxx: [g++, clang++]
+        sound: [true, false]
 
     steps:
     - uses: actions/checkout@v2
@@ -51,10 +65,14 @@ jobs:
     - name: install prereqs
       run: |
         sudo apt update
-        sudo apt install --no-install-recommends libxi-dev libx11-dev libpulse-dev
+        sudo apt install --no-install-recommends libxi-dev libx11-dev
+
+    - name: install pulseaudio
+      if: matrix.sound
+      run: sudo apt install --no-install-recommends libpulse-dev
 
     - name: Configure
-      run: cmake -Bbuild
+      run: cmake -Bbuild -Dsound:BOOL=${{ matrix.sound }}
       env:
         CXX: ${{ matrix.cxx }}
 
@@ -62,15 +80,45 @@ jobs:
       run: cmake --build build --parallel
 
   mac:
-    runs-on: mac-latest
+    timeout-minutes: 10
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        sound: [true, false]
+
+    env:
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+
     steps:
     - uses: actions/checkout@v2
 
     - name: install prereqs
-      run: brew install libxi libx11 pulseaudio
+      run: brew install libxi libx11
+
+    - name: install pulseaudio
+      if: matrix.sound
+      run: brew install pulseaudio
 
     - name: Configure
-      run: cmake -Bbuild
+      run: cmake -Bbuild -Dsound:BOOL=${{ matrix.sound }}
 
     - name: Build
       run: cmake --build build --parallel
+
+  dos:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: open-watcom/setup-watcom@v0
+      with:
+        version: "2.0"
+
+    - uses: actions/checkout@v2
+
+    - name: Configure
+      run: cmake -Bbuild --toolchain dos.cmake
+
+    - name: Build
+      run: cmake --build build
